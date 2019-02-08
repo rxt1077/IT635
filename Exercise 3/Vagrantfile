@@ -1,0 +1,9 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.network "forwarded_port", guest: 80, host: 8080 
+  config.vm.provision "shell", inline: <<-SHELL
+     apt-get update -y
+     DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 mysql-server php libapache2-mod-php php-mysql 
+     mysql < /vagrant/setup.sql
+  SHELL
+end
