@@ -1,0 +1,9 @@
+version: '3.1'
+services:
+    db:
+        image: mysql
+        volumes:
+            - ../mysql-db:/var/lib/mysql
+        command: --default-authentication-plugin=mysql_native_password
+        environment:
+            MYSQL_ROOT_PASSWORD: it635
