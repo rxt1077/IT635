@@ -34,8 +34,8 @@ VALUES
     (2, "Parik Nguyen", "6095555555"),
     (3, "Olga Preel", "2125555555");
 
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'it635';
-CREATE USER 'steve'@'localhost' IDENTIFIED BY 'it635';
-GRANT SELECT ON sis.student_contacts TO 'steve'@'localhost';
-GRANT INSERT ON sis.student_attendance TO 'steve'@'localhost';
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'it635';
+CREATE USER 'steve'@'%' IDENTIFIED BY 'it635';
+GRANT SELECT ON sis.student_contacts TO 'steve'@'%';
+GRANT INSERT ON sis.student_attendance TO 'steve'@'%';
 FLUSH PRIVILEGES;
