@@ -1,2 +1,2 @@
 FROM postgres
-COPY dvdrental.zip /
+COPY docker-entrypoint-initdb.d /docker-entrypoint-initdb.d/
