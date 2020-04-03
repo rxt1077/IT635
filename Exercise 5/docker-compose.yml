@@ -1,0 +1,18 @@
+version: "3.0"
+services:
+    db1:
+        build: .
+        environment:
+            POSTGRES_PASSWORD: asdffdsa
+            POSTGRES_REPLICA_PASSWORD: asdffdsa
+            POSTGRES_NODES: "db1 db2"
+    db2:
+        build: .
+        environment:
+            POSTGRES_PASSWORD: asdffdsa
+            POSTGRES_REPLICA_PASSWORD: asdffdsa
+            POSTGRES_NODES: "db1 db2"
+    adminer:
+        image: adminer
+        ports:
+            - "8080:8080"
