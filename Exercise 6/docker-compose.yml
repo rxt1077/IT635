@@ -5,13 +5,19 @@ services:
         environment:
             POSTGRES_PASSWORD: asdffdsa
             POSTGRES_REPLICA_PASSWORD: asdffdsa
-            POSTGRES_NODES: "db1 db2"
+            POSTGRES_NODES: "db1 db2 db3"
     db2:
         build: .
         environment:
             POSTGRES_PASSWORD: asdffdsa
             POSTGRES_REPLICA_PASSWORD: asdffdsa
-            POSTGRES_NODES: "db1 db2"
+            POSTGRES_NODES: "db1 db2 db3"
+    db3:
+        build: .
+        environment:
+            POSTGRES_PASSWORD: asdffdsa
+            POSTGRES_REPLICA_PASSWORD: asdffdsa
+            POSTGRES_NODES: "db1 db2 db3"
     adminer:
         image: adminer
         ports:
