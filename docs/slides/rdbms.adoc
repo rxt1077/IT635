@@ -1,0 +1,120 @@
+= Relational Databases
+
+The business workhorse
+
+== The Relational Database Model
+
+* Provides a programmer a logical way to access data (instead of physical)
+* Tables are easy to conceptualize
+* Structure (schema) and data are independent
+
+== Tables
+
+* A set of entities (rows)
+* Each row can be thought of as a tuple
+* Columns are attributes of each entity
+* Also called a relation or persistent relation
+
+== Table Characteristics
+
+image::table-characteristics.png[]
+
+== Example
+
+image::table-example.png[]
+
+== Discuss
+
+image::db-meme.png[]
+
+== Keys
+
+[.shrink]
+* One or more attributes that determine other attributes
+* Primary Key (PK) a key that uniquely (PK integrity) identifies an entity (row)
+* Keys allow you to look up things
+* Composite key: Composed of more than one attribute
+* Key attribute: Any attribute that is part of a key
+* Superkey: Any key that uniquely identifies each row
+* Candidate key: A superkey without redundancies
+* Why might you want a composite key?
+
+== Null values
+
+* Technically an indeterminate state
+* Can’t be used on PKs (PK integrity)
+* Should be avoided
+* Causes linking problems and aggregation problems
+* Let’s think of some real-world examples
+
+== Redundancy
+
+* Keys are typically not considered redundant since they allow a particular relational structure to be represented
+* Keys can prevent extra attributes from showing up repeatedly
+
+== Example
+
+image::db-example.png[]
+
+== Foreign Keys
+
+* An attribute whose values match primary key values in the related table
+* Referential integrity: FK contains a value that refers to an existing valid tuple (row) in another relation
+* Secondary key: Key used strictly for data retrieval purposes
+
+== Integrity
+
+image::integrity.png[]
+
+== Relationships
+
+* 1:M - One to many (FK)
+* 1:1 - One to one (May share a PK)
+* N:M - Many to many (use another table to map it)
+
+== Indexes
+
+* Solves the problem of looking things up faster
+* How do you look things up?
+* Prevents having to re-sort the table
+* Can have a tree-like structure
+* Have to be kept up to date (triggers)
+
+== Codd's Rules
+
+image::codd.png[]
+
+== Common Considerations for an RDBMS
+
+* Price
+* Operating System Support
+* ACID (atomicity, consistency, isolation, durability), Referential Integrity support, Transactions support
+* Indexes, materialized view support, trigger support
+* Scalability and security
+* Availability of support and software
+
+== PostgreSQL
+
+* Powerful, open source _object_-relational database
+* Academic roots
+* Growing in popularity (take that MySQL!)
+* Consistent
+
+[.columns]
+== PSQL Meta commands
+
+[.col]
+* \q quit
+* \c connect to a DB
+* \l list DB
+* \d describe
+
+[.col]
+* \dt describe tables
+* \! execute shell command
+* \copy copy to file
+* \i execute commands from file
+
+== WARNING
+
+Meta commands are dileneated with newlines but SQL statements use semicolons
