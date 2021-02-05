@@ -1,0 +1,72 @@
+= Relational Database Best Practices
+
+image::weights.jpg[width=33%]
+
+== Backups
+
+* Implement a backup system and practice backup/recovery because a backup isn't
+  a backup unless you can recover from it.
+* Some popular solutions: https://mariadb.com/kb/en/mysqldump/[mysqldump],
+  https://www.postgresql.org/docs/current/app-pgdump.html[pg_dump]
+* Gives you the SQL you need to rebuild the objects in your DB
+
+=== pg_dump
+
+* works one DB at a time
+* supports other archive formats
+* directory archive
+** UNIX directory with individual files for tables
+** can be dumped in parallel
+** can be selectively restored with pg_restore
+* errors on stderr
+
+== Use databases for isolation
+
+* DBMS manage multiple DB and they are typically the first thing admins use to
+  seperate objects.
+* When you connect you typically specify a DB
+* The term database is unfortunately overloaded, especially by users who may
+  only ever see _their_ database
+
+=== databases in postgreSQL
+
+[.shrink]
+* Every instance of PostgreSQL has at least one DB
+* The default DB is `postgres`
+* Created with `CREATE DATABASE` and deleted with `DROP DB`
+* Can also use `createdb` and `dropdb` from the command line
+* `\l` will show you all the DB
+* DB are stored in the data_directory (`show data_directory;`)
+* Can be stored in different locations via
+  https://www.postgresql.org/docs/13/manage-ag-tablespaces.html[tablespaces]
+
+== Use users and limit access
+
+* All modern midsize and above DBMS support multiple users
+* Users can be used to limit access to databases and the tables within them
+* Users can also be used for accounting to see who is using the DB and how
+* Least privilege: Users should be limited to just what they need
+
+=== Users in PostgreSQL
+
+* Users in PostgreSQL are called roles (it could be one person or multiple)
+* `CREATE ROLE name;` or `DROP ROLE name;` (command line: createuser/dropuser)
+* `\du` lists all of the roles
+* roles can have attributes such as a password (
+  https://www.postgresql.org/docs/current/auth-pg-hba-conf.html[check out
+  pg_hba.conf])
+* Roles can be altered (ALTER) and granted (GRANT) permissions
+
+== SQL addendum (in case you're rusty)
+
+[.shrink]
+* Usually what you need is in more than one table and you will need to join
+  them
+* This can be explicit, with the JOIN operator, or implicit, multiple tables in
+  the FROM clause.
+* Either way, make sure you are explicit or you will get a cartesian join (all
+  possibilities)
+* You can lump rows together with the
+  https://www.w3schools.com/sql/sql_groupby.asp[GROUP BY] statement.
+* This combined with aggregation operators (COUNT, SUM, MAX, MIN, AVG) yields
+  great summary results.

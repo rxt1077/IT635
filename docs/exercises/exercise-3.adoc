@@ -1,0 +1,104 @@
+= Exercise 3
+
+In this exercise we will be
+
+. Setting up a Python environment to run a script that accesses the database
+. Creating a role for that application
+. Granting that role permissions for the tables it needs to access
+. Running the Python script to confirm that it is working
+
+== Python Setup and Analysis
+
+You can find the files the developer gave you
+https://github.com/rxt1077/IT635/[here]. Taking a look at each of them:
+
+.requirements.txt
+[source, text]
+----
+psycopg2-binary
+----
+
+As you can see, we will need to install `psycopg2-binary` to run the script.
+Let's do that now:
+
+[source, console]
+----
+ryan@R90VJ3MK:~/IT635/python-rental$ pip3 install psycopg2-binary
+Collecting psycopg2-binary
+  Downloading https://files.pythonhosted.org/packages/f2/1b/720b36697158113ca1b2221a8e96a470088ccf3770d182214689d1a96a07/psycopg2_binary-2.8.6-cp36-cp36m-ma
+nylinux1_x86_64.whl (3.0MB)
+    100% |████████████████████████████████| 3.0MB 619kB/s
+Installing collected packages: psycopg2-binary
+Successfully installed psycopg2-binary-2.8.6
+----
+
+.rental.py
+[source, python]
+----
+import psycopg2
+
+conn = psycopg2.connect("postgresql://movie_rental:2h6WBFyGVUv88qgJ@localhost/movies")
+cur = conn.cursor()
+
+while True:
+    print("Please enter inventory ID")
+    inventory_id = int(input())
+    print("Please enter customer ID")
+    customer_id = int(input())
+    print("Please enter staff ID")
+    staff_id = int(input())
+    cur.execute("""
+        INSERT INTO rental (rental_date, inventory_id, customer_id, return_date, staff_id)
+        VALUES (NOW(), %s, %s, NOW() + INTERVAL '7 DAYS', %s)
+        RETURNING rental_id;
+    """, (inventory_id, customer_id, staff_id));
+    rental_id = cur.fetchone()[0]
+    print(f"Rental submitted: ID {rental_id}")
+    conn.commit()
+
+cur.close()
+conn.close()
+----
+
+Analyzing this will tell you what username, password, and privileges we need to
+provide.
+
+WARNING: This is a Python 3 script, make sure you use `pip3` and `python3`!
+
+== Role Creation and Permissions
+
+Based on what you learned above, sign in to your database as the `postgres`user
+and create a role for this application. Once you have created the roll, grant
+it the permissions it will need to function. The following resources may be
+helpful:
+
+* https://www.postgresql.org/docs/current/sql-createuser.html[CREATE USER]
+* https://www.postgresql.org/docs/current/sql-grant.html[GRANT]
+
+NOTE: You will need to GRANT privileges to CONNECT to a DB _as well as_
+privileges to interact with the tables in that DB. Also check out the query
+it is doing _more_ than just an INSERT!
+
+WARNING: `movie_rental` will also need to be granted the USAGE of a sequence
+that is used to increment rental_ids:
+`GRANT USAGE ON rental_rental_id_seq TO movie_rental;`
+
+== Testing Out the Script
+
+Finally download and run the script to see if you set up the permissions
+correctly.  You can use `1` for all of the IDs to test it out:
+
+[source, console]
+----
+ryan@R90VJ3MK:~/IT635/rental$ python3 ./rental.py
+Please enter inventory ID
+1
+Please enter customer ID
+1
+Please enter staff ID
+1
+Rental submitted: ID 16055
+----
+
+You can use Ctrl-C to stop the Python script. Take a screenshot of your output
+and submit that for this assignment.

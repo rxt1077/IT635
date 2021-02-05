@@ -1,0 +1,5 @@
+= Programmatic DB Access
+
+* psycopg2
+* listing privileges
+* sequences

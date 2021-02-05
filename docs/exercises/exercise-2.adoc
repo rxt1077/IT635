@@ -1,0 +1,228 @@
+= Exercise 2
+
+In this exercise we will be
+
+. Moving our tables into their own database
+. Setting up a user to access the database
+. Querying the top rentals
+
+== Creating a Database and Copying Tables
+
+Previously we https://github.com/devrimgunduz/pagila[downloaded the pagila
+data] and imported the tables into postgresql. Unfortunately we did this
+without specifying or creating database so the tables went directly into the
+default `postgres` database. We will resolve that now.
+
+First we will run a BASH shell as the `postgres` user and create a new database
+to hold our information:
+
+[source, text]
+----
+ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo -u postgres bash
+postgres@R90VJ3MK:~/IT635/docs/exercises$ psql
+psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
+Type "help" for help.
+
+postgres=# CREATE DATABASE movies;
+CREATE DATABASE
+postgres=# \q
+----
+
+Now, still running that BASH shell as the `postgres` user we will export the
+tables currently in the `postgres` database and import them into the `movies`
+database. We can do this all with `pg_dump`, `psql`, and a
+https://en.wikipedia.org/wiki/Pipeline_(Unix)[pipe]:
+
+[source, text]
+----
+postgres@R90VJ3MK:~/IT635/docs/exercises$ pg_dump -d postgres | psql movies <1>
+<snip>
+----
+<1> Notice the prompt, we are still running as the `postgres` user
+
+Lastly, lets check to see that the tables were copied and then we'll delete the
+old tables:
+
+[source, text]
+----
+postgres@R90VJ3MK:~/IT635/docs/exercises$ psql
+psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
+Type "help" for help.
+
+postgres=# \l <1>
+                              List of databases
+   Name    |  Owner   | Encoding | Collate |  Ctype  |   Access privileges
+-----------+----------+----------+---------+---------+-----------------------
+ movies    | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
+ postgres  | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
+ template0 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres          +
+           |          |          |         |         | postgres=CTc/postgres
+ template1 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres          +
+           |          |          |         |         | postgres=CTc/postgres
+(4 rows)
+
+postgres=# \dt <2>
+              List of relations
+ Schema |       Name       | Type  |  Owner
+--------+------------------+-------+----------
+ public | actor            | table | postgres
+ public | address          | table | postgres
+ public | category         | table | postgres
+ public | city             | table | postgres
+ public | country          | table | postgres
+ public | customer         | table | postgres
+ public | film             | table | postgres
+ public | film_actor       | table | postgres
+ public | film_category    | table | postgres
+ public | inventory        | table | postgres
+ public | language         | table | postgres
+ public | payment          | table | postgres
+ public | payment_p2020_01 | table | postgres
+ public | payment_p2020_02 | table | postgres
+ public | payment_p2020_03 | table | postgres
+ public | payment_p2020_04 | table | postgres
+ public | payment_p2020_05 | table | postgres
+ public | payment_p2020_06 | table | postgres
+ public | rental           | table | postgres
+ public | staff            | table | postgres
+ public | store            | table | postgres
+(21 rows)
+
+postgres=# \c movies <3>
+You are now connected to database "movies" as user "postgres".
+movies=# \dt <4>
+              List of relations
+ Schema |       Name       | Type  |  Owner
+--------+------------------+-------+----------
+ public | actor            | table | postgres
+ public | address          | table | postgres
+ public | category         | table | postgres
+ public | city             | table | postgres
+ public | country          | table | postgres
+ public | customer         | table | postgres
+ public | film             | table | postgres
+ public | film_actor       | table | postgres
+ public | film_category    | table | postgres
+ public | inventory        | table | postgres
+ public | language         | table | postgres
+ public | payment          | table | postgres
+ public | payment_p2020_01 | table | postgres
+ public | payment_p2020_02 | table | postgres
+ public | payment_p2020_03 | table | postgres
+ public | payment_p2020_04 | table | postgres
+ public | payment_p2020_05 | table | postgres
+ public | payment_p2020_06 | table | postgres
+ public | rental           | table | postgres
+ public | staff            | table | postgres
+ public | store            | table | postgres
+(21 rows)
+
+movies=# \c postgres <5>
+You are now connected to database "postgres" as user "postgres".
+postgres=# DROP TABLE actor, address, category, city, country, customer, film, film_actor, film_category, inventory, lan
+guage, payment, payment_p2020_01, payment_p2020_02, payment_p2020_03, payment_p2020_04, payment_p2020_05, payment_p2020_
+06, rental, staff, store CASCADE; <6>
+NOTICE:  drop cascades to 8 other objects
+DETAIL:  drop cascades to function rewards_report(integer,numeric)
+drop cascades to view sales_by_film_category
+drop cascades to view customer_list
+drop cascades to view sales_by_store
+drop cascades to view staff_list
+drop cascades to view actor_info
+drop cascades to view film_list
+drop cascades to view nicer_but_slower_film_list
+DROP TABLE
+postgres=# \dt
+Did not find any relations.
+----
+<1> list all of the datbases
+<2> describe the tables in the `postgres` DB (notice the prompt)
+<3> change to the `movies` database (notice the prompt change)
+<4> describe the tables in the `movies` DB
+<5> switch back to the `postgres` DB
+<6> drop all our old tables (feel free to copy this command)
+
+== Setting up a User
+
+It is not best practice to use the `postgres` user (who has access to
+everything) for database specific tasks. For that reason, we will set up a
+`movie_manager` user who has access to our new `movies` database and can
+perform particular actions on certain tables.
+
+[source, text]
+----
+postgres=# CREATE USER movie_manager WITH PASSWORD 'testing';
+CREATE ROLE
+postgres=# GRANT ALL PRIVILEGES ON DATABASE movies TO movie_manager;
+GRANT
+postgres=# \c movies
+You are now connected to database "movies" as user "postgres".
+movies=# GRANT SELECT, INSERT, UPDATE, DELETE ON rental, film, inventory TO movie_manager;
+GRANT
+----
+
+Now we can test that we can sign in as the manager. Start by exiting psql and
+the `postgres` user shell so you get back to your default user. Then you should
+be able to use a psql URI to easily make the connection:
+
+[source, text]
+----
+ryan@R90VJ3MK:~/IT635/docs/exercises$ psql postgres://movie_manager:testing@localhost:5432/movies <1>
+psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+Type "help" for help.
+
+movies=> \dt <2>
+              List of relations
+ Schema |       Name       | Type  |  Owner
+--------+------------------+-------+----------
+ public | actor            | table | postgres
+ public | address          | table | postgres
+ public | category         | table | postgres
+ public | city             | table | postgres
+ public | country          | table | postgres
+ public | customer         | table | postgres
+ public | film             | table | postgres
+ public | film_actor       | table | postgres
+ public | film_category    | table | postgres
+ public | inventory        | table | postgres
+ public | language         | table | postgres
+ public | payment          | table | postgres
+ public | payment_p2020_01 | table | postgres
+ public | payment_p2020_02 | table | postgres
+ public | payment_p2020_03 | table | postgres
+ public | payment_p2020_04 | table | postgres
+ public | payment_p2020_05 | table | postgres
+ public | payment_p2020_06 | table | postgres
+ public | rental           | table | postgres
+ public | staff            | table | postgres
+ public | store            | table | postgres
+(21 rows)
+----
+<1> Pay close attention to the various parts of this URI. It is used in
+    many different database libraries as well.
+<2> This puts us in the `movies` database and our tables are all there
+
+== Querying the Top Rentals
+
+Now, signed in as the manager use the following query to determine what the top
+ten most rented videos of all time are:
+
+[source, text]
+----
+movies=> SELECT COUNT(film.film_id), title FROM rental, inventory, film
+movies-> WHERE rental.inventory_id=inventory.inventory_id AND inventory.film_id = film.film_id
+movies-> GROUP BY film.film_id
+movies-> ORDER BY COUNT(film.film_id) DESC
+movies-> LIMIT 10;
+<snip>
+----
+
+== Questions
+
+Answer each of the following questions in the text box for this assignment:
+
+. What are the titles of top ten rentals?
+. What is the purpose of the WHERE clause in our final query?
+. Why should we setup up different users and databases instead of using the
+  default `postgres` user and database for everything?
