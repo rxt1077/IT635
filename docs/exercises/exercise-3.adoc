@@ -9,8 +9,9 @@ In this exercise we will be
 
 == Python Setup and Analysis
 
-You can find the files the developer gave you
-https://github.com/rxt1077/IT635/[here]. Taking a look at each of them:
+You can find the files the developer gave you to test
+https://github.com/rxt1077/IT635/tree/master/rental[here]. Taking a look at each
+of them:
 
 .requirements.txt
 [source, text]
@@ -23,7 +24,7 @@ Let's do that now:
 
 [source, console]
 ----
-ryan@R90VJ3MK:~/IT635/python-rental$ pip3 install psycopg2-binary
+ryan@R90VJ3MK:~$ pip3 install psycopg2-binary
 Collecting psycopg2-binary
   Downloading https://files.pythonhosted.org/packages/f2/1b/720b36697158113ca1b2221a8e96a470088ccf3770d182214689d1a96a07/psycopg2_binary-2.8.6-cp36-cp36m-ma
 nylinux1_x86_64.whl (3.0MB)
@@ -88,9 +89,22 @@ that is used to increment rental_ids:
 Finally download and run the script to see if you set up the permissions
 correctly.  You can use `1` for all of the IDs to test it out:
 
-[source, console]
+[source, text]
 ----
-ryan@R90VJ3MK:~/IT635/rental$ python3 ./rental.py
+ryan@R90VJ3MK:~$ wget https://raw.githubusercontent.com/rxt1077/IT635/master/rental/rental.py
+Will not apply HSTS. The HSTS database must be a regular and non-world-writable file.
+ERROR: could not open HSTS store at '/home/ryan/.wget-hsts'. HSTS will be disabled.
+--2021-02-05 14:04:41--  https://raw.githubusercontent.com/rxt1077/IT635/master/rental/rental.py
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 151.101.0.133, 151.101.64.133, 151.101.128.133, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|151.101.0.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 716 [text/plain]
+Saving to: ‘rental.py’
+
+rental.py                              100%[============================================================================>]     716  --.-KB/s    in 0s
+
+2021-02-05 14:04:41 (37.7 MB/s) - ‘rental.py’ saved [716/716]
+ryan@R90VJ3MK:~$ python3 ./rental.py
 Please enter inventory ID
 1
 Please enter customer ID

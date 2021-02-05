@@ -20,6 +20,14 @@
     font-size: 1.5rem;
 }
 
+.reveal .shrink-shrink {
+    font-size: 1.0rem;
+}
+
+.tableblock p {
+    margin: 5px;
+}
+
 /* Shrink heading sizes
 .reveal h1 {
     font-size: 3em;

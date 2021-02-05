@@ -1,5 +1,136 @@
 = Programmatic DB Access
 
-* psycopg2
-* listing privileges
-* sequences
+== Use Case
+
+* Typical "users" of our database are actually going to be applications
+* Roles still need to be set up and privileges limited
+
+== Common Libraries for DB Access
+
+* Python: psycopg2, MySQL Connector, MariaDB Connector
+* PHP: PostgreSQL, MySQLi, PDO
+* These libaries typically allow you to connect, build queries, and get results
+  much like you would in the DB shell
+
+== ORMs
+
+* A more advanced way to interface with a database is via an Object Relational
+  Mapping
+* This will make objects in the language that you are using to correspond to
+  the rows in your DB.
+* Python: SQLAlchemy, Django ORM
+* https://www.fullstackpython.com/object-relational-mappers-orms.html[More Info]
+
+== SQL Injection
+
+* Use a library to sanitize your inputs!
+* DO NOT BUILD QUERIES WITH STRING FUNCTIONS!
+* https://www.w3schools.com/sql/sql_injection.asp[w3schools example]
+
+== PostgreSQL Describing a Table
+
+[source, text]
+----
+movies=# \d rental
+                                           Table "public.rental"
+    Column    |           Type           | Collation | Nullable |                  Default
+--------------+--------------------------+-----------+----------+-------------------------------------------
+ rental_id    | integer                  |           | not null | nextval('rental_rental_id_seq'::regclass)
+ rental_date  | timestamp with time zone |           | not null |
+ inventory_id | integer                  |           | not null |
+ customer_id  | smallint                 |           | not null |
+ return_date  | timestamp with time zone |           |          |
+ staff_id     | smallint                 |           | not null |
+ last_update  | timestamp with time zone |           | not null | now()
+Indexes:
+    "rental_pkey" PRIMARY KEY, btree (rental_id)
+    "idx_unq_rental_rental_date_inventory_id_customer_id" UNIQUE, btree (rental_date, inventory_id, customer_id)
+    "idx_fk_inventory_id" btree (inventory_id)
+Foreign-key constraints:
+    "rental_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON UPDATE CASCADE ON DELETE RESTRICT
+    "rental_inventory_id_fkey" FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id) ON UPDATE CASCADE ON DELETE RESTRICT
+    "rental_staff_id_fkey" FOREIGN KEY (staff_id) REFERENCES staff(staff_id) ON UPDATE CASCADE ON DELETE RESTRICT
+Referenced by:
+    TABLE "payment_p2020_01" CONSTRAINT "payment_p2020_01_rental_id_fkey" FOREIGN KEY (rental_id) REFERENCES rental(rental_id)
+    TABLE "payment_p2020_02" CONSTRAINT "payment_p2020_02_rental_id_fkey" FOREIGN KEY (rental_id) REFERENCES rental(rental_id)
+    TABLE "payment_p2020_03" CONSTRAINT "payment_p2020_03_rental_id_fkey" FOREIGN KEY (rental_id) REFERENCES rental(rental_id)
+    TABLE "payment_p2020_04" CONSTRAINT "payment_p2020_04_rental_id_fkey" FOREIGN KEY (rental_id) REFERENCES rental(rental_id)
+    TABLE "payment_p2020_05" CONSTRAINT "payment_p2020_05_rental_id_fkey" FOREIGN KEY (rental_id) REFERENCES rental(rental_id)
+    TABLE "payment_p2020_06" CONSTRAINT "payment_p2020_06_rental_id_fkey" FOREIGN KEY (rental_id) REFERENCES rental(rental_id)
+----
+
+=== Pay attention to...
+
+* Constraints
+* Default Values
+* Sequences (https://stackoverflow.com/questions/9325017/error-permission-denied-for-sequence-cities-id-seq-using-postgres[require permission to use])
+* Nullable
+
+== PostgreSQL Describing Privileges
+
+[source, text]
+----
+movies=# \dp rental
+                                  Access privileges
+ Schema |  Name  | Type  |      Access privileges      | Column privileges | Policies
+--------+--------+-------+-----------------------------+-------------------+----------
+ public | rental | table | postgres=arwdDxt/postgres  +|                   |
+        |        |       | movie_manager=arwd/postgres+|                   |
+        |        |       | movie_rental=ar/postgres    |                   |
+(1 row)
+----
+
+=== Privilege Abbreviations
+
+[.shrink-shrink]
+|===
+|Privilege|Abbreviation|Object Type
+
+|SELECT
+|r (“read”)
+|LARGE OBJECT, SEQUENCE, TABLE (and table-like objects), table column
+
+|INSERT
+|a (“append”)
+|TABLE, table column
+
+|UPDATE
+|w (“write”)
+|LARGE OBJECT, SEQUENCE, TABLE, table column
+
+|DELETE
+|d
+|TABLE
+
+|TRUNCATE
+|D
+|TABLE
+
+|REFERENCES
+|x
+|TABLE, table column
+
+|TRIGGER
+|t
+|TABLE
+
+|CREATE
+|C
+|DATABASE, SCHEMA, TABLESPACE
+
+|CONNECT
+|c
+|DATABASE
+
+|TEMPORARY
+|T
+|DATABASE
+
+|EXECUTE
+|X
+|FUNCTION, PROCEDURE
+
+|USAGE
+|U
+|DOMAIN, FOREIGN DATA WRAPPER, FOREIGN SERVER, LANGUAGE, SCHEMA, SEQUENCE, TYPE
+|===

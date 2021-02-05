@@ -686,8 +686,9 @@ pre.rouge {
 <h2 id="_python_setup_and_analysis">Python Setup and Analysis</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can find the files the developer gave you
-<a href="https://github.com/rxt1077/IT635/">here</a>. Taking a look at each of them:</p>
+<p>You can find the files the developer gave you to test
+<a href="https://github.com/rxt1077/IT635/tree/master/rental">here</a>. Taking a look at each
+of them:</p>
 </div>
 <div class="listingblock">
 <div class="title">requirements.txt</div>
@@ -701,7 +702,7 @@ Let&#8217;s do that now:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~/IT635/python-rental$</span><span class="w"> </span>pip3 <span class="nb">install </span>psycopg2-binary
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~$</span><span class="w"> </span>pip3 <span class="nb">install </span>psycopg2-binary
 <span class="go">Collecting psycopg2-binary
   Downloading https://files.pythonhosted.org/packages/f2/1b/720b36697158113ca1b2221a8e96a470088ccf3770d182214689d1a96a07/psycopg2_binary-2.8.6-cp36-cp36m-ma
 nylinux1_x86_64.whl (3.0MB)
@@ -814,14 +815,27 @@ correctly.  You can use <code>1</code> for all of the IDs to test it out:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~/IT635/rental$</span><span class="w"> </span>python3 ./rental.py
-<span class="go">Please enter inventory ID
+<pre class="rouge highlight"><code data-lang="text">ryan@R90VJ3MK:~$ wget https://raw.githubusercontent.com/rxt1077/IT635/master/rental/rental.py
+Will not apply HSTS. The HSTS database must be a regular and non-world-writable file.
+ERROR: could not open HSTS store at '/home/ryan/.wget-hsts'. HSTS will be disabled.
+--2021-02-05 14:04:41--  https://raw.githubusercontent.com/rxt1077/IT635/master/rental/rental.py
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 151.101.0.133, 151.101.64.133, 151.101.128.133, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|151.101.0.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 716 [text/plain]
+Saving to: ‘rental.py’
+
+rental.py                              100%[============================================================================&gt;]     716  --.-KB/s    in 0s
+
+2021-02-05 14:04:41 (37.7 MB/s) - ‘rental.py’ saved [716/716]
+ryan@R90VJ3MK:~$ python3 ./rental.py
+Please enter inventory ID
 1
 Please enter customer ID
 1
 Please enter staff ID
 1
-Rental submitted: ID 16055</span></code></pre>
+Rental submitted: ID 16055</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -833,7 +847,7 @@ and submit that for this assignment.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-05 18:44:33 UTC
+Last updated 2021-02-05 19:08:49 UTC
 </div>
 </div>
 </body>
