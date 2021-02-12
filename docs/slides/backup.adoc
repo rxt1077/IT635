@@ -1,0 +1,301 @@
+= Backup, Replication, and Failover
+
+== Backup
+
+=== Pros
+
+* You can actually recover your DB
+* Lots of tools to do this
+* Can be run incrementally
+* Provides a history
+* Relatively easy to do
+* Can be done live
+* Can be done _with_ another option as well
+
+=== Cons
+
+* It can be slow to recover
+* Backups take up space
+* Backups SHOULD be co-located
+* You may encounter vendor specific hiccups
+* It may take some time to set up
+
+=== Things that aren't a backup...
+
+* A RAID array
+* Another node in a DB cluster
+* Something that you don't know how to recover from
+* Something the previous person did that you didn't check
+
+=== The Take Away
+
+* _Always_ setup up an automated backup. It's not hard and the benefits can be
+  immense.
+* Practice recovering from it on a test environment. Subtext: Have a test
+  environment.
+
+== Replication
+
+=== Standard Replication
+
+[plantuml, standard-rep, svg]
+....
+@startuml
+database p as "Primary"
+database s1 as "Secondary"
+database s2 as "Secondary"
+database s3 as "Secondary"
+database t as "Tertiary"
+p -- s1
+p -- s2
+p -- s3
+s3 -- t
+@enduml
+....
+
+=== Ring Replication
+
+[plantuml, ring-rep, svg]
+....
+@startuml
+database p1 as "Primary"
+database p2 as "Primary"
+database p3 as "Primary"
+database p4 as "Primary"
+database s as "Secondary"
+p1 -- p3
+p1 -- p2
+p3 -- p4
+p2 -- p4
+p4 -- s
+@enduml
+....
+
+=== Star Replicaiton
+
+[plantuml, star-rep, svg]
+....
+@startuml
+database p1 as "Primary"
+database p2 as "Primary"
+database p3 as "Primary"
+database p4 as "Primary"
+p1 - p2
+p1 -- p3
+p3 - p4
+p2 -- p4
+p1 -- p4
+p2 -- p3
+@enduml
+....
+
+=== Multi-source Replication
+
+[plantuml, multi-rep, svg]
+....
+@startuml
+database p1 [
+  Primary
+  ---
+  Domain 1
+]
+database p2 [
+  Primary
+  ---
+  Domain 2
+]
+database s1 as "Secondary"
+database s2 as "Secondary"
+p1 -- s1 : Domain 1
+p2 -- s1 : Domain 2
+s1 -- s2 : Domain 1 & 2
+@enduml
+....
+
+=== WAL 
+
+* https://en.wikipedia.org/wiki/Write-ahead_logging[Write-Ahead Logging] (WAL)
+  is typically used so that transactions are logged _before_ they are written
+  to disk.
+* This means replication is often just a matter of shipping the WAL to another
+  node.
+* This also means that journaled filesystems _may_ be redundant for your DB and
+  can slow things down.
+
+=== Containers: Volume Sharing
+
+[plantuml, volshare, svg]
+....
+@startuml
+
+@startuml
+
+actor User
+node Database {
+    database db2 [
+        db2 (RW)
+    ]
+    database db1 [
+        db1 (RW)
+    ]
+}
+
+node Network [
+    <b>Network Storage
+    ----
+    NFS
+    ....
+    AFS
+    ....
+    GlusterFS
+    ....
+    DRBD
+    ....
+    Ceph
+    ....
+    S3
+    ....
+    . . .
+]
+
+node Volumes [
+    <b>Volumes
+    ----
+    data
+    ....
+    backup
+    . . .
+]
+
+User -> Database
+db1 --> Network
+db2 --> Network
+Network -> Volumes
+
+@enduml
+....
+
+=== Containers: Hot/Warm Standby
+
+[plantuml, standby, svg]
+....
+@startuml
+
+actor User
+node Database {
+    database db2 [
+        db2 (Standby R)
+    ]
+    database db1 [
+        db1 (Primary RW)
+    ]
+}
+node Volumes {
+    node data1
+    node data2
+}
+
+User -> Database
+db1 -> db2: WAL records
+db1 --> data1
+db2 --> data2
+
+@enduml
+....
+ 
+== Failover
+
+=== Failover Triggers: Manual
+
+* Unfortunately common
+* "Hey this is down!" admin promotes secondary to primary and works on the old
+  primary.
+* You may encounter situations where they used to have replication, but it died
+  and they never fixed it.
+
+=== Failover Triggers: Detected by Load Balancer
+
+* Have to set up a load balancer that clients connect to
+* Usually already one in place for scalability purposes
+
+=== Failover Triggers: Detected by Client
+
+* Clients may have a pool of servers they try connecting to
+* They can pick randomly for load balancing
+
+=== Failover Triggers: External Monitor
+
+* A program watches for a failure on your network and takes action
+
+=== Failover Implementations: Gratuitous ARP
+
+* Not the nicest network traffic, but it will switch an IP from one MAC address
+  to another within a network segment.
+* May send up some security red flags as it is also used in man-in-the-middle
+  attacks
+
+=== Failover Implementations: DNS
+
+* Change the DNS record for the name that clients are resolving
+* May take a while to end up in the client DNS cache
+* For clients on your network, you can couple this with revoking and renewing
+  DHCP licenses but that’s not _guaranteed_ to help
+
+== High Availability
+
+* Running multiple instances of your DB so something is always available
+* Need to be able to monitor the state of the network and promote nodes as
+  needed.
+* Dual promotion can be a problem
+
+=== Dual Promotion
+
+[plantuml, dualpromotion, svg]
+....
+@startuml
+concise "Node 1" as N1
+concise "Node 2" as N2
+concise "Node 3" as N3
+
+@0
+N1 is Primary
+N2 is Standby
+N3 is Standby
+
+@10
+
+@20
+
+@30
+N2 is Check
+N3 is Check
+
+@40
+N2 is Standby
+N3 is Standby
+
+@50
+N1 is Failed
+
+@60
+N2 is Check
+N3 is Check
+
+@70
+N2 is Primary
+N3 is Primary
+
+@80
+
+@enduml
+....
+
+Solution: Randomize probes, https://en.wikipedia.org/wiki/STONITH[STONITH]
+
+=== Load Balancing
+
+* If you are going to bother to run multiple containers, you might as well
+  spread requests across them.
+* A common solution is to put them behind a http://www.haproxy.org/[proxy], but
+  it may introduce a single point of failure.
+* Most IaaS providers have high reliability load balancers available.

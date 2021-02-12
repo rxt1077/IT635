@@ -1,0 +1,328 @@
+= Exercise 4
+
+In this exercise we will be:
+
+. Creating a logical backup of our database
+. Creating a physical backup of our database
+. Destroying our database and recovering from the backups
+
+== Logical Backup
+
+In previous exercises, we have used the `pg_dump` command to dump a single
+database. Now we are going to use the
+https://www.postgresql.org/docs/13/app-pg-dumpall.html[`pg_dumpall`] command to
+dump _all_ of the databases:
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ sudo -u postgres pg_dumpall --file=logical.sql <1>
+ryan@R90VJ3MK:/tmp$ ls -lh logical.sql <2>
+-rw-r--r-- 1 postgres postgres 3.0M Feb 12 11:30 logical.sql
+----
+<1> `pg_dumpall` dumps to stdout by default, the `--file` option asks it to
+    output to a file
+<2> `-l` means long format and `-h` means human readable sizes
+
+As you can see from the output of the `ls` command, our `sql` file is about 3M.
+While our example is a rather small database, you may encounter significantly
+larger databases in your work as a DBA. Lets compare some different methods for
+compressing the `sql` file and see how they stack up:
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ gzip -9 --keep logical.sql <1>
+ryan@R90VJ3MK:/tmp$ bzip2 -9 --keep logical.sql
+ryan@R90VJ3MK:/tmp$ xz -9 --keep logical.sql
+ryan@R90VJ3MK:/tmp$ ls -lhS logical.* <2>
+-rw-r--r-- 1 postgres postgres 3.0M Feb 12 11:30 logical.sql
+-rw-r--r-- 1 ryan     ryan     623K Feb 12 11:30 logical.sql.gz
+-rw-r--r-- 1 ryan     ryan     474K Feb 12 11:30 logical.sql.bz2
+-rw-r--r-- 1 ryan     ryan     430K Feb 12 11:30 logical.sql.xz
+----
+<1> `-9` chooses the highest compression (longest run time) and `--keep` keeps
+    the original file
+<2> `-S` orders files by size, high to low
+
+As you can see, `xz` offers us the best compression, so a single command to
+create a highly compressed, logical backup of all databases would be
+`sudo -u postgres pg_dumpall | xz -9 > logical.sql.xz`
+
+== Physical Backup
+
+Recall that a physical backup is a copy of the actual database files that are
+stored on the disk. This can be a difficult thing to get _while_ a database is
+in active use. To resolve this issue, PostgreSQL can be put into a _backup_
+mode, where writes are delayed until after the database backup is complete.
+
+To more easily switch into backup mode, back up the files, and switch out of
+backup mode PostgreSQL has a command line utility:
+https://www.postgresql.org/docs/current/app-pgbasebackup.html[pg_basebackup].
+Lets use this utility to create a backup, visually compare what it creates to
+our data directory, and then use the `diff` utility to actually compare each
+file. Since we will be using the `postgres` user for most of this, we will
+start by running a shell _as_ the `postgres` user:
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ sudo -u postgres bash
+postgres@R90VJ3MK:/tmp$ pg_basebackup -D physical <1>
+postgres@R90VJ3MK:/tmp$ pg_lsclusters <2>
+Ver Cluster Port Status Owner    Data directory              Log file
+10  main    5432 online postgres /var/lib/postgresql/10/main /var/log/postgresql/postgresql-10-main.log
+postgres@R90VJ3MK:/tmp$ ls physical/ <3>
+PG_VERSION    global        pg_logical    pg_replslot   pg_stat      pg_tblspc    pg_xact
+backup_label  pg_commit_ts  pg_multixact  pg_serial     pg_stat_tmp  pg_twophase  postgresql.auto.conf
+base          pg_dynshmem   pg_notify     pg_snapshots  pg_subtrans  pg_wal
+postgres@R90VJ3MK:/tmp$ ls /var/lib/postgresql/10/main
+PG_VERSION  pg_commit_ts  pg_multixact  pg_serial     pg_stat_tmp  pg_twophase  postgresql.auto.conf
+base        pg_dynshmem   pg_notify     pg_snapshots  pg_subtrans  pg_wal       postmaster.opts
+global      pg_logical    pg_replslot   pg_stat       pg_tblspc    pg_xact      postmaster.pid
+postgres@R90VJ3MK:/tmp$ diff -qr /var/lib/postgresql/10/main physical <4>
+Only in physical: backup_label
+Only in /var/lib/postgresql/10/main/pg_notify: 0000
+Only in /var/lib/postgresql/10/main/pg_subtrans: 0001
+Only in /var/lib/postgresql/10/main/pg_wal: 000000010000000000000005
+Files /var/lib/postgresql/10/main/pg_wal/000000010000000000000006 and physical/pg_wal/000000010000000000000006 differ
+Only in /var/lib/postgresql/10/main/pg_wal: 000000010000000000000007
+Only in /var/lib/postgresql/10/main: postmaster.opts
+Only in /var/lib/postgresql/10/main: postmaster.pid
+----
+<1> `-D` tell pg_basebackup which directory we want the output in
+<2> `pg_lsclusters` is a quick command line way of finding out what your data
+    directory is. Your data directory may be different.
+<3> visually they look pretty much the same to me
+<4> `diff -qr` will recursively find differences between directory and only
+    print out the differences. In this case a few labels and the latest write
+    ahead logs (WAL) seem to be different. This is what you would expect from
+    a backup.
+
+Now lets make the physical directory into a compressed tar archive so we can
+compare its size to the logical backup:
+
+[source, console]
+----
+postgres@R90VJ3MK:/tmp$ tar c physical/ | xz -9 > physical.tar.xz
+postgres@R90VJ3MK:/tmp$ ls -lhS physical.tar.xz logical.sql.xz
+-rw-r--r-- 1 postgres postgres 1.4M Feb 12 12:30 physical.tar.xz
+-rw-r--r-- 1 ryan     ryan     430K Feb 12 11:45 logical.sql.xz
+----
+
+As you can see, the physical backup ends up being significantly larger.
+
+== Recovery
+
+Let's start by destroying our current database (don't be nervous):
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ sudo service postgresql stop
+ * Stopping PostgreSQL 10 database server                                                                        [ OK ]
+ryan@R90VJ3MK:/tmp$ sudo rm -r /var/lib/postgresql/10/main <1>
+ryan@R90VJ3MK:/tmp$ sudo service postgresql start
+ * Starting PostgreSQL 10 database server
+ * Error: /var/lib/postgresql/10/main is not accessible or does not exist <2>
+----
+<1> Your data directory may be different, check the output of the
+    `pg_lsclusters` run previously.
+<2> Sure enough, it looks like things aren't working
+
+Now we'll initialize an empty data directory so that PostgreSQL can at least
+start. Once it is created I'll also confirm that there is nothing in it. I'll do
+this in a shell as the `postgres` user:
+
+[source, console]
+----
+postgres@R90VJ3MK:/tmp$ /usr/lib/postgresql/10/bin/initdb -D /var/lib/postgresql/10/main <1>
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C.UTF-8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+creating directory /var/lib/postgresql/10/main ... ok
+creating subdirectories ... ok
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting default timezone ... America/New_York
+selecting dynamic shared memory implementation ... posix
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+WARNING: enabling "trust" authentication for local connections
+You can change this by editing pg_hba.conf or using the option -A, or
+--auth-local and --auth-host, the next time you run initdb.
+
+Success. You can now start the database server using:
+
+    /usr/lib/postgresql/10/bin/pg_ctl -D /var/lib/postgresql/10/main -l logfile start
+
+postgres@R90VJ3MK:/tmp$ service postgresql start <2>
+ * Starting PostgreSQL 10 database server                                                                        [ OK ]
+postgres@R90VJ3MK:/tmp$ psql
+psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
+Type "help" for help.
+
+postgres=# \l <3>
+                              List of databases
+   Name    |  Owner   | Encoding | Collate |  Ctype  |   Access privileges
+-----------+----------+----------+---------+---------+-----------------------
+ postgres  | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
+ template0 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres          +
+           |          |          |         |         | postgres=CTc/postgres
+ template1 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres          +
+           |          |          |         |         | postgres=CTc/postgres
+(3 rows)
+
+postgres=# \q
+----
+<1> `initdb` is version specific, so if you are running a newer version of
+    PostgreSQL it may be in a different directory (of the same pattern). Your
+    data directory may also differ.
+<2> Now we can restart PostgreSQL.
+<3> Finally we can see that all our DBs are gone.
+
+Let's start by recovering from our _logical_ backup, which should work with our
+freshly initialized and empty database:
+
+[source, console]
+----
+postgres@R90VJ3MK:/tmp$ xzcat logical.sql.xz | psql
+<snip>
+postgres@R90VJ3MK:/tmp$ psql
+psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
+Type "help" for help.
+
+postgres=# \l
+                                List of databases
+   Name    |  Owner   | Encoding | Collate |  Ctype  |     Access privileges
+-----------+----------+----------+---------+---------+----------------------------
+ movies    | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =Tc/postgres              +
+           |          |          |         |         | postgres=CTc/postgres     +
+           |          |          |         |         | movie_manager=CTc/postgres+
+           |          |          |         |         | movie_rental=c/postgres
+ postgres  | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
+ template0 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres               +
+           |          |          |         |         | postgres=CTc/postgres
+ template1 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | postgres=CTc/postgres     +
+           |          |          |         |         | =c/postgres
+(4 rows)
+
+postgres=# \c movies
+You are now connected to database "movies" as user "postgres".
+movies=# \dt
+              List of relations
+ Schema |       Name       | Type  |  Owner
+--------+------------------+-------+----------
+ public | actor            | table | postgres
+ public | address          | table | postgres
+ public | category         | table | postgres
+ public | city             | table | postgres
+ public | country          | table | postgres
+ public | customer         | table | postgres
+ public | film             | table | postgres
+ public | film_actor       | table | postgres
+ public | film_category    | table | postgres
+ public | inventory        | table | postgres
+ public | language         | table | postgres
+ public | payment          | table | postgres
+ public | payment_p2020_01 | table | postgres
+ public | payment_p2020_02 | table | postgres
+ public | payment_p2020_03 | table | postgres
+ public | payment_p2020_04 | table | postgres
+ public | payment_p2020_05 | table | postgres
+ public | payment_p2020_06 | table | postgres
+ public | rental           | table | postgres
+ public | staff            | table | postgres
+ public | store            | table | postgres
+(21 rows)
+
+movies=# \q
+----
+
+Sure enough, our movies database (and any changes we made to the other
+databases) are back. Now we'll destroy the data directory again, but this
+time use the _physical_ backup to recover (which will not require the `initdb`
+command):
+
+[source, console]
+----
+postgres@R90VJ3MK:/tmp$ rm -r /var/lib/postgresql/10/main <1>
+postgres@R90VJ3MK:/tmp$ mkdir --mode=700 /var/lib/postgresql/10/main <2>
+postgres@R90VJ3MK:/tmp$ tar Jxvf physical.tar.xz -C /var/lib/postgresql/10/main --strip-components=1 <3>
+<snip>
+postgres@R90VJ3MK:/tmp$ service postgresql start
+ * Starting PostgreSQL 10 database server                                                                        [ OK ]
+postgres@R90VJ3MK:/tmp$ psql
+psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
+Type "help" for help.
+
+postgres=# \l
+                                List of databases
+   Name    |  Owner   | Encoding | Collate |  Ctype  |     Access privileges
+-----------+----------+----------+---------+---------+----------------------------
+ movies    | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =Tc/postgres              +
+           |          |          |         |         | postgres=CTc/postgres     +
+           |          |          |         |         | movie_manager=CTc/postgres+
+           |          |          |         |         | movie_rental=c/postgres
+ postgres  | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
+ template0 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres               +
+           |          |          |         |         | postgres=CTc/postgres
+ template1 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres               +
+           |          |          |         |         | postgres=CTc/postgres
+(4 rows)
+
+postgres=# \c movies
+You are now connected to database "movies" as user "postgres".
+movies=# \dt
+              List of relations
+ Schema |       Name       | Type  |  Owner
+--------+------------------+-------+----------
+ public | actor            | table | postgres
+ public | address          | table | postgres
+ public | category         | table | postgres
+ public | city             | table | postgres
+ public | country          | table | postgres
+ public | customer         | table | postgres
+ public | film             | table | postgres
+ public | film_actor       | table | postgres
+ public | film_category    | table | postgres
+ public | inventory        | table | postgres
+ public | language         | table | postgres
+ public | payment          | table | postgres
+ public | payment_p2020_01 | table | postgres
+ public | payment_p2020_02 | table | postgres
+ public | payment_p2020_03 | table | postgres
+ public | payment_p2020_04 | table | postgres
+ public | payment_p2020_05 | table | postgres
+ public | payment_p2020_06 | table | postgres
+ public | rental           | table | postgres
+ public | staff            | table | postgres
+ public | store            | table | postgres
+(21 rows)
+
+movies=# \q
+----
+<1> Remove the old data directory.
+<2> Data directories must be only readable by the postgres user.
+<3> We uncompress this tar archive in the data directory, `-C`, and we strip
+    of the first part of all paths, `--strip-components`, which for us is the
+    `physical` directory we included in our archive.
+
+Sure enough, this method also recovered our database and all tables.
+
+== Questions
+
+Answer these questions as your submission for this exercise:
+
+[qanda]
+What is the difference between a _logical_ and _physical_ database backup?::
+  {empty}
+In your experience, which type of back up takes up more space?::
+  {empty}
+In your experience, which type of back up is easier to recover from? Why?::
+  {empty}

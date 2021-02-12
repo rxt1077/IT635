@@ -4,6 +4,11 @@
     box-shadow: none;
 } */
 
+/* Give images a white background */
+.reveal section img {
+  background: white;
+}
+
 /* Shrink callout text 
 .reveal .colist td { 
     font-size: 1.25rem;
