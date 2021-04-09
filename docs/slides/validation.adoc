@@ -1,0 +1,322 @@
+= MongoDB Validation
+
+How do we wrangle a loosey-goosey NoSQL DB?
+
+== Schema Validation
+
+[.shrink]
+* documents can be validated during updates and insertions
+* you can pass a validator to `db.createCollection()` _or_ you can use the `collMod` command on a existing collection
+* `validationLevel` determines how MongoDB applies validation rules to existing documents _during an update_
+* `validationAction` determines whether MongoDB validation gives errors or warnings
+
+== JSON Schema
+
+[.shrink]
+Here is a validator expression that uses
+https://docs.mongodb.com/manual/reference/operator/query/jsonSchema/#mongodb-query-op.-jsonSchema[JSON schema]
+(the preferred method):
+
+[source, json]
+----
+{
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: [ "name", "year", "major", "address" ],
+      properties: {
+        name: {
+          bsonType: "string",
+          description: "must be a string and is required"
+        },
+        year: {
+          bsonType: "int",
+          minimum: 2017,
+          maximum: 3017,
+          description: "must be an integer in [ 2017, 3017 ] and is required"
+        },
+        major: {
+          enum: [ "Math", "English", "Computer Science", "History", null ],
+          description: "can only be one of the enum values and is required"
+        },
+        gpa: {
+          bsonType: [ "double" ],
+          description: "must be a double if the field exists"
+        },
+        address: {
+          bsonType: "object",
+          required: [ "city" ],
+          properties: {
+            street: {
+              bsonType: "string",
+              description: "must be a string if the field exists"
+            },
+            city: {
+              bsonType: "string",
+              description: "must be a string and is required"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+----
+
+== Scripting for mongo Shell
+
+* given the complexity of a validator, it's probably a good time to introduce
+  scripts for the mongo shell
+* MongoDB supports JavaScript scripts
+* you can `load` scripts from inside the shell: `load("script.js")`
+* you can run scripts from the mongo command: `mongo script.js`
+* in your script you _can not_ use helpers!
+
+== Example
+
+Now we'll make a script to add a validator to the movies collection
+
+=== Step 1: Analysis
+
+[.shrink]
+Take a good long look at one of the items you are validating:
+
+[source, text]
+----
+> use movies
+switched to db movies
+> show collections
+customers
+films
+stores
+> db.films.find({ _id: 1 }).pretty()
+{
+        "_id" : 1,
+        "Actors" : [
+                {
+                        "First name" : "PENELOPE",
+                        "Last name" : "GUINESS",
+                        "actorId" : 1
+                },
+                {
+                        "First name" : "CHRISTIAN",
+                        "Last name" : "GABLE",
+                        "actorId" : 10
+                },
+                {
+                        "First name" : "LUCILLE",
+                        "Last name" : "TRACY",
+                        "actorId" : 20
+                },
+                {
+                        "First name" : "SANDRA",
+                        "Last name" : "PECK",
+                        "actorId" : 30
+                },
+                {
+                        "First name" : "JOHNNY",
+                        "Last name" : "CAGE",
+                        "actorId" : 40
+                },
+                {
+                        "First name" : "MENA",
+                        "Last name" : "TEMPLE",
+                        "actorId" : 53
+                },
+                {
+                        "First name" : "WARREN",
+                        "Last name" : "NOLTE",
+                        "actorId" : 108
+                },
+                {
+                        "First name" : "OPRAH",
+                        "Last name" : "KILMER",
+                        "actorId" : 162
+                },
+                {
+                        "First name" : "ROCK",
+                        "Last name" : "DUKAKIS",
+                        "actorId" : 188
+                },
+                {
+                        "First name" : "MARY",
+                        "Last name" : "KEITEL",
+                        "actorId" : 198
+                }
+        ],
+        "Category" : "Documentary",
+        "Description" : "A Epic Drama of a Feminist And a Mad Scientist who must Battle a Teacher in The Canadian Rockie
+s",
+        "Length" : "86",
+        "Rating" : "PG",
+        "Rental Duration" : "6",
+        "Replacement Cost" : "20.99",
+        "Special Features" : "Deleted Scenes,Behind the Scenes",
+        "Title" : "ACADEMY DINOSAUR"
+}
+----
+
+=== Step 1: Analysis
+
+[.shrink]
+You can use the projection document to analyze fields that may be enums:
+
+[source, text]
+----
+> db.films.find({ }, { "Category": 1 }).pretty()
+{ "_id" : 2, "Category" : "Horror" }
+{ "_id" : 1, "Category" : "Documentary" }
+{ "_id" : 3, "Category" : "Documentary" }
+{ "_id" : 4, "Category" : "Horror" }
+{ "_id" : 5, "Category" : "Family" }
+{ "_id" : 6, "Category" : "Foreign" }
+{ "_id" : 7, "Category" : "Comedy" }
+{ "_id" : 8, "Category" : "Horror" }
+{ "_id" : 11, "Category" : "Foreign" }
+{ "_id" : 10, "Category" : "Sports" }
+{ "_id" : 9, "Category" : "Horror" }
+{ "_id" : 13, "Category" : "Horror" }
+{ "_id" : 14, "Category" : "Classics" }
+{ "_id" : 12, "Category" : "Music" }
+{ "_id" : 16, "Category" : "Foreign" }
+{ "_id" : 15, "Category" : "Foreign" }
+{ "_id" : 17, "Category" : "Music" }
+{ "_id" : 18, "Category" : "Animation" }
+{ "_id" : 20, "Category" : "Music" }
+{ "_id" : 21, "Category" : "Action" }
+----
+
+=== Step 2: Write the validator script
+
+.mongo-examples/validator.js
+[source, javascript]
+----
+filmValidator = {
+  $jsonSchema: {
+    bsonType: "object",
+    required: [ "Actors", "Category", "Description", "Length", "Rating",
+      "Rental Duration", "Replacement Cost", "Special Features", "Title" ],
+    properties: {
+      Actors: {
+        bsonType: "array",
+        uniqueItems: true,
+        items: {
+          bsonType: "object",
+          required: [ "First name", "Last name", "actorId" ],
+          description: "All actors must have the stated fields",
+          properties: {
+            "First name": {
+              bsonType: "string",
+              description: "All actors must have a 'First name'"
+            },
+            "Last name": {
+              bsonType: "string",
+              description: "All actors must have a 'Last name'"
+            },
+            actorId: {
+              bsonType: "number",
+              description: "All actors must have an 'actorId'"
+            }
+          }
+        }
+      },
+      Category: {
+        enum: [ "Horror", "Documentary", "Family", "Foreign", "Comedy", "Sports",
+          "Classics", "Music", "Animation", "Action" ],
+        description: "Category must exist and be one of the enum values"
+      },
+      Description: {
+        bsonType: "string",
+        description: "Description must exist and be a string"
+      },
+      Length: {
+        bsonType: "string",
+        description: "Length must exist and be a string"
+      },
+      Rating: {
+        enum: [ "G", "PG", "PG-13", "R", "NC-17" ],
+        description: "Rating must exist and be one of the enum values"
+      },
+      "Rental Duration": {
+        bsonType: "string",
+        description: "Rental Duration must exist and be a string"
+      },
+      "Replacement Cost": {
+        bsonType: "string",
+        description: "Replacement Cost must exist and be a string"
+      },
+      "Special Features": {
+        bsonType: "string",
+        description: "Special Features must exist and be a string"
+      },
+      Title: {
+        bsonType: "string",
+        description: "Title must exist and be a string"
+      }
+    }
+  }
+}
+----
+
+=== Step 3: Add validator to collection
+
+[source, text]
+----
+> load("mongo-examples/validator.js")
+true
+> db.runCommand({collMod: "films", validator: filmValidator})
+{ "ok" : 1 }
+----
+
+=== Step 4: Testing an Invalid Doc
+[source, text]
+----
+> db.films.insert({})
+WriteResult({
+        "nInserted" : 0,
+        "writeError" : {
+                "code" : 121,
+                "errmsg" : "Document failed validation"
+        }
+})
+----
+
+=== Step 4: Test a Valid Doc
+[source, text]
+----
+> load("mongo-examples/takenFilm.js")
+true
+> takenFilm
+{
+        "Actors" : [
+                {
+                        "First name" : "LIAM",
+                        "Last name" : "NEESON",
+                        "actorId" : 512
+                }
+        ],
+        "Category" : "Action",
+        "Description" : "Liam kills everyone in Paris, twice.",
+        "Length" : "90",
+        "Rating" : "R",
+        "Rental Duration" : "6",
+        "Replacement Cost" : "20.99",
+        "Special Features" : "Free punch in face from Liam",
+        "Title" : "TAKEN"
+}
+> db.films.insert(takenFilm)
+WriteResult({ "nInserted" : 1 })
+----
+
+== Discussion
+
+* What does `additionalProperties` do?
+* How you do troubleshoot validation issues?
+* What is weak about this validation?
+
+== Resources
+
+* https://docs.mongodb.com/manual/core/schema-validation/[MongoDB Manual: Schema Validation]
+* https://docs.mongodb.com/manual/reference/operator/query/jsonSchema/#mongodb-query-op.-jsonSchema[$jsonSchema operator]
+* https://docs.mongodb.com/manual/tutorial/write-scripts-for-the-mongo-shell/[MongoDB Manual: Write Scripts for the mongo Shell]
+* https://www.mongodb.com/blog/post/json-schema-validation--checking-your-arrays[JSON Schema Validation - Checking Your Arrays]

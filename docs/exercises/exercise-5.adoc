@@ -1,0 +1,198 @@
+= Exercise 5
+
+In this exercise we will be optimizing a query by creating an index.
+
+== Analyzing the Unoptimized Query
+
+As the `postgres` user, run `psql`, change to the `movies` database, and
+describe the `film` table:
+
+[source, text]
+----
+ryan@R90VJ3MK:~$ sudo -u postgres psql
+[sudo] password for ryan:
+psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
+Type "help" for help.
+
+postgres=# \c movies
+You are now connected to database "movies" as user "postgres".
+movies=# \d film
+                                              Table "public.film"
+        Column        |           Type           | Collation | Nullable |                Default
+----------------------+--------------------------+-----------+----------+---------------------------------------
+ film_id              | integer                  |           | not null | nextval('film_film_id_seq'::regclass)
+ title                | text                     |           | not null |
+ description          | text                     |           |          |
+ release_year         | year                     |           |          |
+ language_id          | smallint                 |           | not null |
+ original_language_id | smallint                 |           |          |
+ rental_duration      | smallint                 |           | not null | 3
+ rental_rate          | numeric(4,2)             |           | not null | 4.99
+ length               | smallint                 |           |          |
+ replacement_cost     | numeric(5,2)             |           | not null | 19.99
+ rating               | mpaa_rating              |           |          | 'G'::mpaa_rating
+ last_update          | timestamp with time zone |           | not null | now()
+ special_features     | text[]                   |           |          |
+ fulltext             | tsvector                 |           | not null |
+Indexes: <1>
+    "film_pkey" PRIMARY KEY, btree (film_id)
+    "film_fulltext_idx" gist (fulltext)
+    "idx_fk_language_id" btree (language_id)
+    "idx_fk_original_language_id" btree (original_language_id)
+    "idx_title" btree (title)
+Foreign-key constraints:
+    "film_language_id_fkey" FOREIGN KEY (language_id) REFERENCES language(language_id) ON UPDATE CASCADE ON DELETE RESTR
+ICT
+    "film_original_language_id_fkey" FOREIGN KEY (original_language_id) REFERENCES language(language_id) ON UPDATE CASCA
+DE ON DELETE RESTRICT
+Referenced by:
+    TABLE "film_actor" CONSTRAINT "film_actor_film_id_fkey" FOREIGN KEY (film_id) REFERENCES film(film_id) ON UPDATE CAS
+CADE ON DELETE RESTRICT
+    TABLE "film_category" CONSTRAINT "film_category_film_id_fkey" FOREIGN KEY (film_id) REFERENCES film(film_id) ON UPDA
+TE CASCADE ON DELETE RESTRICT
+    TABLE "inventory" CONSTRAINT "inventory_film_id_fkey" FOREIGN KEY (film_id) REFERENCES film(film_id) ON UPDATE CASCA
+DE ON DELETE RESTRICT
+----
+<1> As you can see, our database already has quite a few indexes to optimize
+    queries
+
+Now imagine that we are support a web application that picks movies for
+customers based on how much time they have. This application will be making
+quite a few queries looking for a specific `length` such as
+`SELECT title FROM film WHERE length=183`. Let's see how long a query like
+this takes by using `EXPLAIN ANALYZE`:
+
+[source, text]
+....
+movies=# EXPLAIN ANALYZE SELECT title FROM film WHERE length=183;
+                                           QUERY PLAN
+------------------------------------------------------------------------------------------------
+ Seq Scan on film  (cost=0.00..67.50 rows=6 width=15) (actual time=0.033..0.211 rows=5 loops=1) <1>
+   Filter: (length = 183)
+   Rows Removed by Filter: 995
+ Planning time: 0.158 ms
+ Execution time: 0.220 ms
+(5 rows)
+....
+<1> The total cost of this query is 67.50 with a startup cost of 0.00
+
+As you can see `EXPLAIN ANALYZE` not only prints out the estimated cost, but
+_also_ the actual time to perform the query. It also tells you _how_ the query
+was performed, `Seq Scan` in this case.
+
+== Creating and Testing A B-Tree Index
+
+Now we'll create a btree index on the `length` column in the `film` table.
+Recall that btree is the default so we will not be specifying a `USING`
+method:
+
+[source, text]
+----
+movies=# CREATE INDEX idx_length ON film(length);
+CREATE INDEX
+movies=# \d film
+                                              Table "public.film"
+        Column        |           Type           | Collation | Nullable |                Default
+----------------------+--------------------------+-----------+----------+---------------------------------------
+ film_id              | integer                  |           | not null | nextval('film_film_id_seq'::regclass)
+ title                | text                     |           | not null |
+ description          | text                     |           |          |
+ release_year         | year                     |           |          |
+ language_id          | smallint                 |           | not null |
+ original_language_id | smallint                 |           |          |
+ rental_duration      | smallint                 |           | not null | 3
+ rental_rate          | numeric(4,2)             |           | not null | 4.99
+ length               | smallint                 |           |          |
+ replacement_cost     | numeric(5,2)             |           | not null | 19.99
+ rating               | mpaa_rating              |           |          | 'G'::mpaa_rating
+ last_update          | timestamp with time zone |           | not null | now()
+ special_features     | text[]                   |           |          |
+ fulltext             | tsvector                 |           | not null |
+Indexes:
+    "film_pkey" PRIMARY KEY, btree (film_id)
+    "film_fulltext_idx" gist (fulltext)
+    "idx_fk_language_id" btree (language_id)
+    "idx_fk_original_language_id" btree (original_language_id)
+    "idx_length" btree (length) <1>
+    "idx_title" btree (title)
+Foreign-key constraints:
+    "film_language_id_fkey" FOREIGN KEY (language_id) REFERENCES language(language_id) ON UPDATE CASCADE ON DELETE RESTR
+ICT
+    "film_original_language_id_fkey" FOREIGN KEY (original_language_id) REFERENCES language(language_id) ON UPDATE CASCA
+DE ON DELETE RESTRICT
+Referenced by:
+    TABLE "film_actor" CONSTRAINT "film_actor_film_id_fkey" FOREIGN KEY (film_id) REFERENCES film(film_id) ON UPDATE CAS
+CADE ON DELETE RESTRICT
+    TABLE "film_category" CONSTRAINT "film_category_film_id_fkey" FOREIGN KEY (film_id) REFERENCES film(film_id) ON UPDA
+TE CASCADE ON DELETE RESTRICT
+    TABLE "inventory" CONSTRAINT "inventory_film_id_fkey" FOREIGN KEY (film_id) REFERENCES film(film_id) ON UPDATE CASCA
+DE ON DELETE RESTRICT
+----
+<1> You can see here that we now have a btree index named "idx_length" on the
+    `length` column.
+
+Now lets test out our query with the same `EXPLAIN ANALYZE` command:
+
+[source, text]
+....
+movies=# EXPLAIN ANALYZE SELECT title FROM film WHERE length=183;
+                                                    QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on film  (cost=4.32..22.45 rows=6 width=15) (actual time=0.017..0.022 rows=5 loops=1)
+   Recheck Cond: (length = 183)
+   Heap Blocks: exact=5
+   ->  Bitmap Index Scan on idx_length  (cost=0.00..4.32 rows=6 width=0) (actual time=0.013..0.013 rows=5 loops=1)
+         Index Cond: (length = 183)
+ Planning time: 0.208 ms
+ Execution time: 0.036 ms
+(7 rows)
+....
+
+You can see that we now have a startup cost of 4.32 but our total cost is down
+by a factor of three to 22.45. You'll also see that we are now performing a
+`Bitmap Heap Scan` followed by a `Bitmap Index Scan`.
+
+== Creating and Testing A Hash Index
+
+The B-Tree index was a significant improvement, but let's see how a hash index
+compares. We'll `DROP` the previous index, create a new `hash` index, and run
+our `EXPLAIN ANALYZE` query:
+
+[source, text]
+....
+movies=# DROP INDEX idx_length; <1>
+DROP INDEX
+movies=# CREATE INDEX idx_length ON film USING hash (length);
+CREATE INDEX
+movies=# EXPLAIN ANALYZE SELECT title FROM film WHERE length=183;
+                                                    QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on film  (cost=4.05..22.18 rows=6 width=15) (actual time=0.017..0.024 rows=5 loops=1)
+   Recheck Cond: (length = 183)
+   Heap Blocks: exact=5
+   ->  Bitmap Index Scan on idx_length  (cost=0.00..4.04 rows=6 width=0) (actual time=0.011..0.012 rows=5 loops=1)
+         Index Cond: (length = 183)
+ Planning time: 0.178 ms
+ Execution time: 0.048 ms
+(7 rows)
+....
+
+The results appear to be the same as the B-Tree results. This is because a
+`Bitmap Heap Scan` and a `Bitmap Index Scan` still had to be used to find the
+result. 
+
+== Questions
+
+Answer these questions in the text box provided for the assignment
+
+[qanda]
+What indexes _already_ existed for the `film` table before we started?::
+  {empty}
+What is the difference between `EXPLAIN` and `EXPLAIN ANALYZE`?::
+  {empty}
+Why does a query with an index have a greater startup cost than the query without an index?::
+  {empty}
+Why is length _not_ a good candidate for a hash index?::
+  {empty}
+Why is it important to drop indexes that aren't being used?::
+  {empty}

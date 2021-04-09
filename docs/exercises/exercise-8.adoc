@@ -1,0 +1,17 @@
+= Exercise 8
+
+Create a MongoDB validator for the `customers` collection. It _does not_ have
+to validate their rentals array (although you can try if you like). Apply that
+validator to the `customers` collection and test it by adding a valid customer
+and an invalid customer.
+
+When you are finished, answer the following questions in the text box provided
+by the assignment on Canvas:
+
+[qanda]
+What was the most difficult aspect of this exercise?::
+  {empty}
+Compare and contrast MongoDB schema validation with PostgreSQL integrity constraints.::
+  {empty}
+Many argue that validation is _best_ performed at the application level, why does it also make sense to have it available at the DBMS level?::
+  {empty}

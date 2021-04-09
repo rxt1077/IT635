@@ -1,0 +1,101 @@
+= The Emergence of NoSQL DBs
+
+== Traditional Development Cycle (Waterfall)
+
+image::waterfall.png[]
+
+== RDBMS Considerations
+
+* When does the schema get created?
+* Who has to make those changes?
+* How complex are database migrations?
+* How often do they happen?
+* How good was your original design?
+* RDBMS tend to scale vertically (add more processing power, memory, storage,etc.)
+* RDBMS do not shard well (scale horizontally)
+
+[.columns]
+=== Sharding
+
+[.col]
+* Breaking large tables into smaller chunks (shards) spread across multiple
+  servers.
+* https://en.wikipedia.org/wiki/Shard_(database_architecture)[Reference]
+
+[.col]
+image::key-shard.png[]
+
+== CAP-Theorem (Brewer, 2000)
+
+Pick two:
+
+* Consistency: all clients see the same verion of the data (atomic transactions
+  can help in achieving this)
+* Availability: all clients can always find the requested data
+* Partition-tolerance: splitting your system across nodes doesn't affect the
+  user
+* https://en.wikipedia.org/wiki/CAP_theorem[Source]
+
+=== CAP-Theorem
+
+image::cap.png[]
+
+[.shrink]
+Image Source: Shertil, Mahmud (2016). TRADITIONAL RDBMS TO NOSQL DATABASE: NEW ERA OF DATABASES FOR BIG DATA.
+
+== Key-Value Store
+
+image::key-value.png[]
+
+=== Advantages
+
+* Simple
+* Fast
+* Great for caches (see https://redis.io/[Redis])
+
+== Wide Column
+
+image::wide-column.png[]
+
+=== Advantages
+
+* Basically a 2D Key-Value
+* See https://hbase.apache.org/[HBase]
+* Lots of unstructured data across lots of nodes
+* Pioneered by
+  https://static.googleusercontent.com/media/research.google.com/en//archive/bigtable-osdi06.pdf[Google Big Table]
+
+== Document
+
+image::document.png[]
+
+=== Advantages
+
+* Kind of structured (you can create integrity rules)
+* Easy to develop for (you're probably already using a serialization format)
+* Easy sharding
+* Support https://en.wikipedia.org/wiki/Create,_read,_update_and_delete[CRUD]
+* See https://www.mongodb.com/3[MongoDB]
+
+== Graph
+
+image::graph.png[]
+
+[.shrink]
+https://www.infoq.com/articles/graph-nosql-neo4j[Source]
+
+=== Advantages
+
+* Follows the natural flow of getting from one thing to another. Can see significant performance increases on these types of queries.
+* Relationships aren't keys, relationships are... well.. relationships
+* Shards better than a relational database (think in terms of a map)
+* See https://neo4j.com/[neo4j]
+* https://neo4j.com/developer/graph-db-vs-rdbms/[Good resouce]
+
+== Why go NoSQL?
+
+Are we...
+
+* Solving a problem? - GOOD
+* Implementing a solution for a problem that doesn't exist? - BAD (at work)
+* Creating a bigger problem? - BAD

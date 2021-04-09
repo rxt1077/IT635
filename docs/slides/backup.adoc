@@ -34,6 +34,27 @@
 * Practice recovering from it on a test environment. Subtext: Have a test
   environment.
 
+[.columns]
+=== The Two Types of Replication
+
+.Logical
+[.col.shrink]
+--
+* the SQL or what it takes to make the DB
+* mysqldump - Oldest and very common to find in cron jobs
+* Mariabackup - An example of a vendor-specific (mostly) tool. A fork of a more
+  general backup project. Lots of options.
+--
+
+.Physical
+[.col.shrink]
+--
+* the volume, disk, or filesystem
+* LVM - Easy to backup with a script
+* Btrfs - Supports snapshots but not typically considered stable enough for production
+* ZFS - Made on Solaris, ported to Linux
+--
+
 == Replication
 
 === Standard Replication
@@ -71,7 +92,7 @@ p4 -- s
 @enduml
 ....
 
-=== Star Replicaiton
+=== Star Replication
 
 [plantuml, star-rep, svg]
 ....

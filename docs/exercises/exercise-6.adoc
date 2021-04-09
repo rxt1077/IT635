@@ -1,0 +1,209 @@
+= Exercise 6
+
+In this exercise, we will be:
+
+* Installing MongoDB
+* Testing the installation
+* Downloading the Sakila DVD rental database in JSON format for import into
+  MongoDB
+* Performing our first query with MongoDB
+* Answering a few questions
+
+== Installing MongoDB
+
+=== WSL2 on Windows
+
+We can use the `apt-get install` command to install the community edition of MongoDB:
+
+[source, console]
+----
+ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo apt-get install mongodb
+[sudo] password for ryan:
+Reading package lists... Done
+Building dependency tree
+Reading state information... Done
+The following additional packages will be installed:
+  libboost-filesystem1.65.1 libboost-iostreams1.65.1 libboost-program-options1.65.1 libboost-system1.65.1 libgoogle-perftools4 libsnappy1v5 libstemmer0d libtcmalloc-minimal4 libyaml-cpp0.5v5 mongo-tools
+  mongodb-clients mongodb-server mongodb-server-core
+The following NEW packages will be installed:
+  libboost-filesystem1.65.1 libboost-iostreams1.65.1 libboost-program-options1.65.1 libboost-system1.65.1 libgoogle-perftools4 libsnappy1v5 libstemmer0d libtcmalloc-minimal4 libyaml-cpp0.5v5 mongo-tools
+  mongodb mongodb-clients mongodb-server mongodb-server-core
+0 upgraded, 14 newly installed, 0 to remove and 0 not upgraded.
+Need to get 53.5 MB of archives.
+After this operation, 217 MB of additional disk space will be used.
+Do you want to continue? [Y/n]
+Get:1 http://archive.ubuntu.com/ubuntu bionic/main amd64 libboost-system1.65.1 amd64 1.65.1+dfsg-0ubuntu5 [10.5 kB]
+Get:2 http://archive.ubuntu.com/ubuntu bionic/main amd64 libboost-filesystem1.65.1 amd64 1.65.1+dfsg-0ubuntu5 [40.3 kB]
+<snip>
+----
+
+=== MacOS
+
+The recommended procedure for MacOS is to install via the Homebrew package
+manager (which is a great tool to get familiar with BTW).
+https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/[Instructions can be found here.]
+
+== Testing our installation
+
+Now we should be able to start the service (if it isn't running already) and
+connect via the mongo shell:
+
+[source, console]
+----
+ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo service mongodb start
+ * Starting database mongodb                                                                                                                                                                              [ OK ]
+ryan@R90VJ3MK:~/IT635/docs/exercises$ mongo
+MongoDB shell version v3.6.3
+connecting to: mongodb://127.0.0.1:27017
+MongoDB server version: 3.6.3
+Welcome to the MongoDB shell.
+For interactive help, type "help".
+For more comprehensive documentation, see
+        http://docs.mongodb.org/
+Questions? Try the support group
+        http://groups.google.com/group/mongodb-user
+Server has startup warnings:
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten]
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+> help
+        db.help()                    help on db methods
+        db.mycoll.help()             help on collection methods
+        sh.help()                    sharding helpers
+        rs.help()                    replica set helpers
+        help admin                   administrative help
+        help connect                 connecting to a db help
+        help keys                    key shortcuts
+        help misc                    misc things to know
+        help mr                      mapreduce
+
+        show dbs                     show database names
+        show collections             show collections in current database
+        show users                   show users in current database
+        show profile                 show most recent system.profile entries with time >= 1ms
+        show logs                    show the accessible logger names
+        show log [name]              prints out the last segment of log in memory, 'global' is default
+        use <db_name>                set current database
+        db.foo.find()                list objects in collection foo
+        db.foo.find( { a : 1 } )     list objects in foo where a == 1
+        it                           result of the last line evaluated; use to further iterate
+        DBQuery.shellBatchSize = x   set default number of items to display on shell
+        exit                         quit the mongo shell
+> show dbs
+admin  0.000GB
+local  0.000GB
+> exit
+bye
+----
+
+== Downloading and loading the Sample DB
+
+We will be using the Sakila database, converted to JSON as found
+http://guyharrison.squarespace.com/storage/sakila.tgz[here].
+
+[source, console]
+----
+ryan@R90VJ3MK:~/IT635/docs/exercises$ wget http://guyharrison.squarespace.com/storage/sakila.tgz
+Will not apply HSTS. The HSTS database must be a regular and non-world-writable file.
+ERROR: could not open HSTS store at '/home/ryan/.wget-hsts'. HSTS will be disabled.
+--2021-03-12 10:25:58--  http://guyharrison.squarespace.com/storage/sakila.tgz
+Resolving guyharrison.squarespace.com (guyharrison.squarespace.com)... 198.49.23.177, 198.185.159.176, 198.185.159.177, ...
+Connecting to guyharrison.squarespace.com (guyharrison.squarespace.com)|198.49.23.177|:80... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: http://static1.1.sqspcdn.com/static/f/359481/26067410/1427081957890/sakila.tgz?token=MShSPWx2I2A1Akf5wBdwgBMD%2FbA%3D [following]
+--2021-03-12 10:25:58--  http://static1.1.sqspcdn.com/static/f/359481/26067410/1427081957890/sakila.tgz?token=MShSPWx2I2A1Akf5wBdwgBMD%2FbA%3D
+Resolving static1.1.sqspcdn.com (static1.1.sqspcdn.com)... 151.101.0.238, 151.101.64.238, 151.101.128.238, ...
+Connecting to static1.1.sqspcdn.com (static1.1.sqspcdn.com)|151.101.0.238|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 780149 (762K) [application/octet-stream]
+Saving to: ‘sakila.tgz’
+
+sakila.tgz                                           100%[===================================================================================================================>] 761.86K  --.-KB/s    in 0.1s
+
+2021-03-12 10:25:59 (7.56 MB/s) - ‘sakila.tgz’ saved [780149/780149]
+
+ryan@R90VJ3MK:~/IT635/docs/exercises$ tar zxvf sakila.tgz <1>
+customers.json
+films.json
+stores.json
+ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo mongoimport customers.json <2>
+2021-03-12T10:26:53.110-0500    no collection specified
+2021-03-12T10:26:53.110-0500    using filename 'customers' as collection
+2021-03-12T10:26:53.126-0500    connected to: localhost
+2021-03-12T10:26:53.278-0500    imported 599 documents
+ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo mongoimport films.json
+2021-03-12T10:26:59.242-0500    no collection specified
+2021-03-12T10:26:59.242-0500    using filename 'films' as collection
+2021-03-12T10:26:59.243-0500    connected to: localhost
+2021-03-12T10:26:59.296-0500    imported 1000 documents
+ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo mongoimport stores.json
+2021-03-12T10:27:03.567-0500    no collection specified
+2021-03-12T10:27:03.567-0500    using filename 'stores' as collection
+2021-03-12T10:27:03.569-0500    connected to: localhost
+2021-03-12T10:27:03.613-0500    imported 2 documents
+----
+<1> Don't forget to uncompress the archive
+<2> Note that this must be run as root
+
+== Performing a query
+
+Now let's connect to the MongoDB, use the test DB, find the object in the `film`
+collection named `ALI FOREVER`:
+
+[source, console]
+----
+ryan@R90VJ3MK:~/IT635/docs/exercises$ mongo
+MongoDB shell version v3.6.3
+connecting to: mongodb://127.0.0.1:27017
+MongoDB server version: 3.6.3
+Server has startup warnings:
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten]
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+> use test
+switched to db test
+> show collections
+customers
+films
+stores
+> db.films.find( { Title: "ALI FOREVER" } )
+{ "_id" : 13, "Actors" : [ { "First name" : "CARY", "Last name" : "MCCONAUGHEY", "actorId" : 77 }, { "First name" : "CHRISTOPHER", "Last name" : "BERRY", "actorId" : 91 }, { "First name" : "KENNETH", "Last nam
+e" : "TORN", "actorId" : 94 }, { "First name" : "MORGAN", "Last name" : "MCDORMAND", "actorId" : 114 }, { "First name" : "JON", "Last name" : "CHASE", "actorId" : 176 } ], "Category" : "Horror", "Description"
+: "A Action-Packed Drama of a Dentist And a Crocodile who must Battle a Feminist in The Canadian Rockies", "Length" : "150", "Rating" : "PG", "Rental Duration" : "4", "Replacement Cost" : "21.99", "Special Fea
+tures" : "Deleted Scenes,Behind the Scenes", "Title" : "ALI FOREVER" }
+> exit
+bye
+----
+
+MongoDB queries consist of multiple documents (parameters) passed as JSON. The
+first document (the only one we are using today) is called the
+https://docs.mongodb.com/manual/core/document/#document-query-filter[query
+filter document]. Ours is `{ Title: "ALI FOREVER" }` meaning we want to
+documents that match the title `ALI FOREVER`. You can learn more about
+https://docs.mongodb.com/manual/tutorial/query-documents/[MongoDB queries here].
+
+== Questions
+
+Please use the text box for this assignment to answer the following questions:
+
+. Why might JSON be easier for developers to use than SQL?
+. Why does the film we queried have an `_id` attribute even though it wasn't in
+  the original data?
+. Based on today's query, collections in MongoDB seem analogous to what in
+  PostgreSQL?

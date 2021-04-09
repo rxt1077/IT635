@@ -1,0 +1,110 @@
+= Exercise 7
+
+In this exercise we will be:
+
+. Creating a new DB for our DVD rental information
+. Exporting our old DB to BSON
+. Importing that BSON into the new DB
+. Deleting the collections in the old DB
+
+== Exporting
+
+When we imported our movie rental data, it automatically went into the default
+`test` database. Let's export that data from the system shell (not mongo shell)
+to BSON now:
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ mongodump --archive="test.bson" --db="test" <1>
+2021-03-26T12:51:13.720-0400    writing test.films to archive 'test.bson'
+2021-03-26T12:51:13.720-0400    writing test.customers to archive 'test.bson'
+2021-03-26T12:51:13.720-0400    writing test.stores to archive 'test.bson'
+2021-03-26T12:51:13.724-0400    done dumping test.stores (2 documents)
+2021-03-26T12:51:13.730-0400    done dumping test.films (1000 documents)
+2021-03-26T12:51:13.738-0400    done dumping test.customers (599 documents)
+----
+<1> notice I'm in the tmp directory to make sure there are no permission issues
+
+== Importing
+
+Now let's import that BSON data into a _new_ DB named `movies`. This DB will be
+created automatically. The `nsFrom` and `nsTo` commands are used to rewrite a
+namespace, which in our case is changing the DB from `test` to `movies`:
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ mongorestore --archive="test.bson" --nsFrom='test.*' --nsTo='movies.*'
+2021-03-26T12:54:57.739-0400    preparing collections to restore from
+2021-03-26T12:54:57.760-0400    reading metadata for movies.stores from archive 'test.bson'
+2021-03-26T12:54:57.780-0400    restoring movies.stores from archive 'test.bson'
+2021-03-26T12:54:57.790-0400    no indexes to restore
+2021-03-26T12:54:57.791-0400    finished restoring movies.stores (2 documents)
+2021-03-26T12:54:57.793-0400    reading metadata for movies.films from archive 'test.bson'
+2021-03-26T12:54:57.815-0400    restoring movies.films from archive 'test.bson'
+2021-03-26T12:54:57.829-0400    reading metadata for movies.customers from archive 'test.bson'
+2021-03-26T12:54:57.849-0400    restoring movies.customers from archive 'test.bson'
+2021-03-26T12:54:57.853-0400    no indexes to restore
+2021-03-26T12:54:57.853-0400    finished restoring movies.films (1000 documents)
+2021-03-26T12:54:57.885-0400    no indexes to restore
+2021-03-26T12:54:57.885-0400    finished restoring movies.customers (599 documents)
+2021-03-26T12:54:57.885-0400    done
+----
+
+== Deleting the Old Collections
+
+Now that we have everything in our new `movies` DB we will delete the
+collections we added to the `test` DB last week. It is pretty standard to have
+a `test` DB so we will keep the DB and just remove the collections:
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ mongo <1>
+MongoDB shell version v3.6.3
+connecting to: mongodb://127.0.0.1:27017
+MongoDB server version: 3.6.3
+Server has startup warnings:
+2021-03-26T12:24:20.538-0400 I STORAGE  [initandlisten]
+2021-03-26T12:24:20.538-0400 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
+2021-03-26T12:24:20.538-0400 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+movies  0.002GB
+test    0.002GB
+> use test
+switched to db test
+> show collections
+customers
+films
+stores
+> db.customers.remove({}) <2>
+WriteResult({ "nRemoved" : 599 })
+> db.films.remove({})
+WriteResult({ "nRemoved" : 1000 })
+> db.stores.remove({})
+WriteResult({ "nRemoved" : 2 })
+> quit()
+----
+<1> Notice how we are working _within_ the mongo shell here
+<2> Remove takes a query document as a parameter, specify what kinds of
+    documents to remove. The empty document, `{}`, removes all documents in
+    the collection.
+
+== Questions
+
+[qanda]
+Now that you have used it for some basic administrative tasks, what differences do you notice between MongoDB and PostgreSQL?::
+  {empty}
+What is the _basic_ difference between BSON and JSON?::
+  {empty}
+If a DB in PostgreSQL is equivalent to a DB in MongoDB, what are tables and rows from PostgreSQL equivalent to in MongoDB?::
+  {empty}

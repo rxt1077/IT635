@@ -9,10 +9,10 @@
   background: white;
 }
 
-/* Shrink callout text 
+/* Shrink callout text  */
 .reveal .colist td { 
     font-size: 1.25rem;
-} */
+}
 
 /* Shrink admonitions and give them a border
 .reveal div.admonitionblock table {

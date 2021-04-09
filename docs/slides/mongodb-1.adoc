@@ -1,0 +1,90 @@
+= MongoDB Documents, Collections, and Databases
+
+== https://www.json.org/json-en.html[JSON]
+
+[.shrink]
+* an lightweight data-interchange format based on how JavaScript represents
+  objects
+* human readable and _very_ popular:
+  `{ "name": "example", "description": "This is an example" }`
+* no trailing commas
+* no comments
+* `\` is used for escape codes: `{ "emoji": "\uF600" }`
+* arrays are supported `{ "array": ["one", "two", "three"] }`
+* binary representation is called BSON
+
+== https://docs.mongodb.com/manual/core/document/#bson-document-format[Documents]
+
+[.shrink]
+* data records are stored as _documents_ in BSON
+* all documents have a `_id` attribute that holds an
+  https://docs.mongodb.com/manual/reference/bson-types/#objectid[ObjectId]
+* documents can have embedded documents (another document within this document)
+* dot notation is used to access array elements by embedded fields:
+  "<array>.<index>" or "<document>.<field>"
+* documents are also used as
+  https://docs.mongodb.com/manual/core/document/#document-query-filter[query filters],
+  https://docs.mongodb.com/manual/core/document/#document-update-specification[update specs],
+  and https://docs.mongodb.com/manual/core/document/#document-index-specification[index specs]
+
+=== Example
+
+[source, bson]
+----
+{
+  name: { first: "Alan", last: "Turing" },
+  contact: { phone: { type: "cell", number: "111-222-3333" } },
+  hobbies: [ "code breaking", "running" ]
+}
+----
+
+* First name: "name.first"
+* Second hobby: "hobbies.1"
+* Phone number: "contact.phone.number"
+
+== Databases
+
+* DBs hold one or more collections of documents
+* `use` switches DBs
+* `show dbs` prints a list of all DBs
+* the default db is `test`
+* MongoDB _will_ create a DB automatically if needed
+
+=== Backing up a DB
+
+[.shrink]
+`mongodump` can be used from the command line (not the mongo shell) to export
+the content of a running server into .bson files
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ mongodump --archive="test.bson" --db="test"
+2021-03-26T12:30:40.323-0400    writing test.films to archive 'test.bson'
+2021-03-26T12:30:40.323-0400    writing test.customers to archive 'test.bson'
+2021-03-26T12:30:40.324-0400    writing test.stores to archive 'test.bson'
+2021-03-26T12:30:40.344-0400    done dumping test.stores (2 documents)
+2021-03-26T12:30:40.347-0400    done dumping test.films (1000 documents)
+2021-03-26T12:30:40.356-0400    done dumping test.customers (599 documents)
+ryan@R90VJ3MK:/tmp$ ls test.bson
+test.bson
+ryan@R90VJ3MK:/tmp$ file test.bson
+test.bson: data <1>
+----
+<1> this is _binary_ data, `mongoexport` will give you JSON, but you need to
+    run it for each collection
+
+=== Recovering a DB
+
+* `mongorestore` can be used to restore a `mongodump` export
+* `mongorestore` _will not_ import objects whose IDs already exist
+
+== Collections
+
+[.shrink]
+* documents are store in collections within a DB
+* you can think of collections like tables and documents like the rows
+* collections use the dot notation and can be automatically created:
+  `db.myNewCollection2.insertOne( { x: 1 } )`
+* collections can be shown with `show collections` in the mongo shell
+* collections have a UUID which can be seen when you run
+  `db.getCollectionInfos()` in the mongo shell

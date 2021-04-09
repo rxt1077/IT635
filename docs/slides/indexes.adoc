@@ -1,0 +1,78 @@
+= Using Indexes
+
+== Purpose
+
+* Sequential searches of unordered data can really slow things down
+* Imagine looking up a name in a long, unordered list
+* We can create metadata for finding the names in that list
+* Indexes speed up queries in this fashion
+
+== Pitfalls
+
+* Indexes need to be updated when the table is updated, this can slow
+  things down
+* Not all data works well with indexes
+
+== Types
+
+=== B-tree
+
+image::btree.jpg[]
+
+* Default
+* Helps with queries using `<`, `<=`, `=`, `>=`, `>`
+
+=== Hash
+
+image::hash.svg[]
+
+* Only assists with `=` operator
+* Non-unique items require further searching
+
+=== Others
+
+* GiST: An infrastructure for defining how to use indexing strategies
+* SP-GiST: more non-balanced, disk-based structures
+* GIN: separate entries for components of a relation. Can be useful for arrays.
+* BRIN: Block Range INdexes, help find values stored in consecutive physical
+  block ranges. 
+
+== What are they good for?
+
+* Can speed up searching queries: `WHERE id=<something>`
+* Can speed up ordering results: `ORDER BY`
+* You can have a multi-column index
+* A multi-column query can still benefit from individual indexes
+* Indexes can be created _on expressions_ too:
+  `CREATE INDEX test1_lower_col1_idx ON test1 (lower(col1));`
+
+== What's the downside?
+
+* Takes time to build and keep up to date
+* In general you should remove indexes that aren't used
+* You _can_ build partial indexes if needed
+
+== Timing Queries
+
+* You can turn on timing for _all_ queries via `\timing`
+* This only gives you times so it may not be the best for benchmarking
+
+== Explaining Queries
+
+* The `EXPLAIN` command will help you benchmark a query
+* The `EXPLAIN ANALYZE` command will do the same but also execute the query and
+  time it
+
+[source, text]
+....
+movies=# EXPLAIN ANALYZE SELECT title FROM film WHERE length=183;
+                                           QUERY PLAN
+------------------------------------------------------------------------------------------------
+ Seq Scan on film  (cost=0.00..67.50 rows=6 width=15) (actual time=0.033..0.211 rows=5 loops=1) <1>
+   Filter: (length = 183)
+   Rows Removed by Filter: 995
+ Planning time: 0.158 ms
+ Execution time: 0.220 ms
+(5 rows)
+....
+
