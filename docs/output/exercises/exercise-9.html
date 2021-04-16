@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.13">
-<title>Exercise 4</title>
+<title>Exercise 9</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -653,450 +653,408 @@ pre.rouge {
 </head>
 <body class="article">
 <div id="header">
-<h1>Exercise 4</h1>
+<h1>Exercise 9</h1>
 </div>
 <div id="content">
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this exercise we will be:</p>
+<p>In this exercise, we will see one of the major advantages of using a NoSQL DB:
+ease of replication.</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Creating a logical backup of our database</p>
-</li>
-<li>
-<p>Creating a physical backup of our database</p>
-</li>
-<li>
-<p>Destroying our database and recovering from the backups</p>
-</li>
-</ol>
+<div class="paragraph">
+<p>Since we will need multiple servers running, we will use Docker for this
+exercise. If you don&#8217;t have Docker installed, you can download and install it
+here: <a href="https://docs.docker.com/get-docker/" class="bare">https://docs.docker.com/get-docker/</a></p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_logical_backup">Logical Backup</h2>
+<h2 id="_creating_a_basic_docker_compose_file">Creating a Basic Docker Compose File</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In previous exercises, we have used the <code>pg_dump</code> command to dump a single
-database. Now we are going to use the
-<a href="https://www.postgresql.org/docs/13/app-pg-dumpall.html"><code>pg_dumpall</code></a> command to
-dump <em>all</em> of the databases:</p>
+<p>In an empty directory, create the following file:</p>
 </div>
 <div class="listingblock">
+<div class="title">docker-compose.yml</div>
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">sudo</span> <span class="nt">-u</span> postgres pg_dumpall <span class="nt">--file</span><span class="o">=</span>logical.sql <i class="conum" data-value="1"></i><b>(1)</b>
-<span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">ls</span> <span class="nt">-lh</span> logical.sql <i class="conum" data-value="2"></i><b>(2)</b>
-<span class="go">-rw-r--r-- 1 postgres postgres 3.0M Feb 12 11:30 logical.sql</span></code></pre>
+<pre class="rouge highlight"><code data-lang="yml"><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.1'</span>
+<span class="na">services</span><span class="pi">:</span>
+    <span class="na">db1</span><span class="pi">:</span>
+        <span class="na">image</span><span class="pi">:</span> <span class="s">mongo</span>
+        <span class="na">command</span><span class="pi">:</span> <span class="s">--replSet "rs0"</span>
+    <span class="na">db2</span><span class="pi">:</span>
+        <span class="na">image</span><span class="pi">:</span> <span class="s">mongo</span>
+        <span class="na">command</span><span class="pi">:</span> <span class="s">--replSet "rs0"</span>
+    <span class="na">db3</span><span class="pi">:</span>
+        <span class="na">image</span><span class="pi">:</span> <span class="s">mongo</span>
+        <span class="na">command</span><span class="pi">:</span> <span class="s">--replSet "rs0"</span></code></pre>
 </div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>pg_dumpall</code> dumps to stdout by default, the <code>--file</code> option asks it to
-output to a file</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>-l</code> means long format and <code>-h</code> means human readable sizes</td>
-</tr>
-</table>
 </div>
 <div class="paragraph">
-<p>As you can see from the output of the <code>ls</code> command, our <code>sql</code> file is about 3M.
-While our example is a rather small database, you may encounter significantly
-larger databases in your work as a DBA. Lets compare some different methods for
-compressing the <code>sql</code> file and see how they stack up:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">gzip</span> <span class="nt">-9</span> <span class="nt">--keep</span> logical.sql <i class="conum" data-value="1"></i><b>(1)</b>
-<span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>bzip2 <span class="nt">-9</span> <span class="nt">--keep</span> logical.sql
-<span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>xz <span class="nt">-9</span> <span class="nt">--keep</span> logical.sql
-<span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">ls</span> <span class="nt">-lhS</span> logical.<span class="k">*</span> <i class="conum" data-value="2"></i><b>(2)</b>
-<span class="go">-rw-r--r-- 1 postgres postgres 3.0M Feb 12 11:30 logical.sql
--rw-r--r-- 1 ryan     ryan     623K Feb 12 11:30 logical.sql.gz
--rw-r--r-- 1 ryan     ryan     474K Feb 12 11:30 logical.sql.bz2
--rw-r--r-- 1 ryan     ryan     430K Feb 12 11:30 logical.sql.xz</span></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>-9</code> chooses the highest compression (longest run time) and <code>--keep</code> keeps
-the original file</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>-S</code> orders files by size, high to low</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>As you can see, <code>xz</code> offers us the best compression, so a single command to
-create a highly compressed, logical backup of all databases would be
-<code>sudo -u postgres pg_dumpall | xz -9 &gt; logical.sql.xz</code></p>
+<p>This tells docker compose that you want to start three DB services, each with
+<code>--replSet "rs0"</code> passed to the <code>mongod</code> command when they start. Each of these
+services will use the <a href="https://hub.docker.com/_/mongo">Docker Hub mongo image</a>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_physical_backup">Physical Backup</h2>
+<h2 id="_running_and_building_the_replica_set">Running and Building the Replica Set</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Recall that a physical backup is a copy of the actual database files that are
-stored on the disk. This can be a difficult thing to get <em>while</em> a database is
-in active use. To resolve this issue, PostgreSQL can be put into a <em>backup</em>
-mode, where writes are delayed until after the database backup is complete.</p>
-</div>
-<div class="paragraph">
-<p>To more easily switch into backup mode, back up the files, and switch out of
-backup mode PostgreSQL has a command line utility:
-<a href="https://www.postgresql.org/docs/current/app-pgbasebackup.html">pg_basebackup</a>.
-Lets use this utility to create a backup, visually compare what it creates to
-our data directory, and then use the <code>diff</code> utility to actually compare each
-file. Since we will be using the <code>postgres</code> user for most of this, we will
-start by running a shell <em>as</em> the <code>postgres</code> user:</p>
+<p>You should now be able to start the system by running <code>docker-compose up</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">sudo</span> <span class="nt">-u</span> postgres bash
-<span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>pg_basebackup <span class="nt">-D</span> physical <i class="conum" data-value="1"></i><b>(1)</b>
-<span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>pg_lsclusters <i class="conum" data-value="2"></i><b>(2)</b>
-<span class="go">Ver Cluster Port Status Owner    Data directory              Log file
-10  main    5432 online postgres /var/lib/postgresql/10/main /var/log/postgresql/postgresql-10-main.log
-</span><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">ls </span>physical/ <i class="conum" data-value="3"></i><b>(3)</b>
-<span class="go">PG_VERSION    global        pg_logical    pg_replslot   pg_stat      pg_tblspc    pg_xact
-backup_label  pg_commit_ts  pg_multixact  pg_serial     pg_stat_tmp  pg_twophase  postgresql.auto.conf
-base          pg_dynshmem   pg_notify     pg_snapshots  pg_subtrans  pg_wal
-</span><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">ls</span> /var/lib/postgresql/10/main
-<span class="go">PG_VERSION  pg_commit_ts  pg_multixact  pg_serial     pg_stat_tmp  pg_twophase  postgresql.auto.conf
-base        pg_dynshmem   pg_notify     pg_snapshots  pg_subtrans  pg_wal       postmaster.opts
-global      pg_logical    pg_replslot   pg_stat       pg_tblspc    pg_xact      postmaster.pid
-</span><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>diff <span class="nt">-qr</span> /var/lib/postgresql/10/main physical <i class="conum" data-value="4"></i><b>(4)</b>
-<span class="go">Only in physical: backup_label
-Only in /var/lib/postgresql/10/main/pg_notify: 0000
-Only in /var/lib/postgresql/10/main/pg_subtrans: 0001
-Only in /var/lib/postgresql/10/main/pg_wal: 000000010000000000000005
-Files /var/lib/postgresql/10/main/pg_wal/000000010000000000000006 and physical/pg_wal/000000010000000000000006 differ
-Only in /var/lib/postgresql/10/main/pg_wal: 000000010000000000000007
-Only in /var/lib/postgresql/10/main: postmaster.opts
-Only in /var/lib/postgresql/10/main: postmaster.pid</span></code></pre>
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>docker-compose up
+<span class="go">Creating network "tmp_default" with the default driver
+Pulling db1 (mongo:)...
+latest: Pulling from library/mongo
+6e0aa5e7af40: Pull complete
+d47239a868b3: Pull complete
+49cbb10cca85: Pull complete
+9729d7ec22de: Pull complete
+7b7fd72268d8: Pull complete
+5e2934dacaf5: Pull complete
+bf9da24d4b2c: Pull complete
+d2f8c3715616: Pull complete
+e9f96a4a45b0: Pull complete
+bd66718f31e2: Pull complete
+41ed4d1a1542: Pull complete
+7336dfc228e2: Pull complete
+Digest: sha256:b66f48968d757262e5c29979e6aa3af944d4ef166314146e1b3a788f0d191ac3
+Status: Downloaded newer image for mongo:latest
+Creating tmp_db2_1 ... done
+Creating tmp_db1_1 ... done
+Creating tmp_db3_1 ... done
+Attaching to tmp_db1_1, tmp_db2_1, tmp_db3_1
+</span><span class="gp">db2_1  | {"t":{"$</span><span class="nb">date</span><span class="s2">":"</span>2021-04-16T19:35:32.409+00:00<span class="s2">"},"</span>s<span class="s2">":"</span>I<span class="s2">",  "</span>c<span class="s2">":"</span>CONTROL<span class="s2">",  "</span><span class="nb">id</span><span class="s2">":23285,   "</span>ctx<span class="s2">":"</span>main<span class="s2">","</span>msg<span class="s2">":"</span>Automatically disabling TLS 1.0, to forc
+<span class="go">e-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
+</span><span class="gp">db3_1  | {"t":{"$</span><span class="nb">date</span><span class="s2">":"</span>2021-04-16T19:35:32.421+00:00<span class="s2">"},"</span>s<span class="s2">":"</span>I<span class="s2">",  "</span>c<span class="s2">":"</span>CONTROL<span class="s2">",  "</span><span class="nb">id</span><span class="s2">":23285,   "</span>ctx<span class="s2">":"</span>main<span class="s2">","</span>msg<span class="s2">":"</span>Automatically disabling TLS 1.0, to forc
+<span class="go">e-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
+</span><span class="gp">db1_1  | {"t":{"$</span><span class="nb">date</span><span class="s2">":"</span>2021-04-16T19:35:32.424+00:00<span class="s2">"},"</span>s<span class="s2">":"</span>I<span class="s2">",  "</span>c<span class="s2">":"</span>CONTROL<span class="s2">",  "</span><span class="nb">id</span><span class="s2">":23285,   "</span>ctx<span class="s2">":"</span>main<span class="s2">","</span>msg<span class="s2">":"</span>Automatically disabling TLS 1.0, to forc
+<span class="gp">&lt;snip&gt;</span></code></pre>
 </div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>-D</code> tell pg_basebackup which directory we want the output in</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td><code>pg_lsclusters</code> is a quick command line way of finding out what your data
-directory is. Your data directory may be different.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>visually they look pretty much the same to me</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td><code>diff -qr</code> will recursively find differences between directory and only
-print out the differences. In this case a few labels and the latest write
-ahead logs (WAL) seem to be different. This is what you would expect from
-a backup.</td>
-</tr>
-</table>
 </div>
 <div class="paragraph">
-<p>Now lets make the physical directory into a compressed tar archive so we can
-compare its size to the logical backup:</p>
+<p>Now open <em>another terminal</em> and <em>cd into the same directory</em>. From that
+terminal we will run the mongo console on db1 and connect to db1:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">tar </span>c physical/ | xz <span class="nt">-9</span> <span class="o">&gt;</span> physical.tar.xz
-<span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">ls</span> <span class="nt">-lhS</span> physical.tar.xz logical.sql.xz
-<span class="go">-rw-r--r-- 1 postgres postgres 1.4M Feb 12 12:30 physical.tar.xz
--rw-r--r-- 1 ryan     ryan     430K Feb 12 11:45 logical.sql.xz</span></code></pre>
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>docker-compose run db1 mongo <span class="nt">--host</span> db1
+<span class="go">Creating tmp_db1_run ... done
+MongoDB shell version v4.4.5
+connecting to: mongodb://db1:27017/?compressors=disabled&amp;gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("230754ad-6ecb-4167-9ac0-78c8751f5a79") }
+MongoDB server version: 4.4.5
+Welcome to the MongoDB shell.
+For interactive help, type "help".
+For more comprehensive documentation, see
+        https://docs.mongodb.com/
+Questions? Try the MongoDB Developer Community Forums
+        https://community.mongodb.com
+---
+The server generated these startup warnings when booting:
+        2021-04-16T19:35:32.436+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/co
+re/prodnotes-filesystem
+        2021-04-16T19:35:33.346+00:00: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+        2021-04-16T19:35:33.346+00:00: /sys/kernel/mm/transparent_hugepage/enabled is 'always'. We suggest setting it to 'never'
+---
+---
+        Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+        metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+        The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+        and anyone you share the URL with. MongoDB may use this information to make product
+        improvements and to suggest MongoDB products and deployment options to you.
+
+        To enable free monitoring, run the following command: db.enableFreeMonitoring()
+        To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+</span><span class="gp">&gt;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>As you can see, the physical backup ends up being significantly larger.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_recovery">Recovery</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Let&#8217;s start by destroying our current database (don&#8217;t be nervous):</p>
+<p>From this mongo shell prompt we will initiate a replica set, add db2 and db3,
+and print out information about the cluster:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">sudo </span>service postgresql stop
-<span class="go"> * Stopping PostgreSQL 10 database server                                                                        [ OK ]
-</span><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">sudo rm</span> <span class="nt">-r</span> /var/lib/postgresql/10/main <i class="conum" data-value="1"></i><b>(1)</b>
-<span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">sudo </span>service postgresql start
-<span class="go"> * Starting PostgreSQL 10 database server
- * Error: /var/lib/postgresql/10/main is not accessible or does not exist <i class="conum" data-value="2"></i><b>(2)</b>
-</span></code></pre>
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">&gt;</span><span class="w"> </span>rs.initiate<span class="o">()</span>
+<span class="go">{
+        "info2" : "no configuration specified. Using a default configuration for the set",
+        "me" : "00216464f334:27017",
+        "ok" : 1,
+</span><span class="gp">        "$</span>clusterTime<span class="s2">" : {
+</span><span class="go">                "clusterTime" : Timestamp(1618602242, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1618602242, 1)
+}
+</span><span class="gp">rs0:SECONDARY&gt;</span><span class="w"> </span>rs.add<span class="o">(</span><span class="s2">"db2"</span><span class="o">)</span>
+<span class="go">{
+        "ok" : 1,
+</span><span class="gp">        "$</span>clusterTime<span class="s2">" : {
+</span><span class="go">                "clusterTime" : Timestamp(1618602261, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1618602261, 1)
+}
+</span><span class="gp">rs0:PRIMARY&gt;</span><span class="w"> </span>rs.add<span class="o">(</span><span class="s2">"db3"</span><span class="o">)</span>
+<span class="go">{
+        "ok" : 1,
+</span><span class="gp">        "$</span>clusterTime<span class="s2">" : {
+</span><span class="go">                "clusterTime" : Timestamp(1618602284, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1618602284, 1)
+}
+</span><span class="gp">rs0:PRIMARY&gt;</span><span class="w"> </span>rs.conf<span class="o">()</span>
+<span class="go">{
+        "_id" : "rs0",
+        "version" : 3,
+        "term" : 1,
+        "protocolVersion" : NumberLong(1),
+        "writeConcernMajorityJournalDefault" : true,
+        "members" : [
+                {
+                        "_id" : 0,
+                        "host" : "00216464f334:27017",
+                        "arbiterOnly" : false,
+                        "buildIndexes" : true,
+                        "hidden" : false,
+                        "priority" : 1,
+                        "tags" : {
+
+                        },
+                        "slaveDelay" : NumberLong(0),
+                        "votes" : 1
+                },
+                {
+                        "_id" : 1,
+                        "host" : "db2:27017",
+                        "arbiterOnly" : false,
+                        "buildIndexes" : true,
+                        "hidden" : false,
+                        "priority" : 1,
+                        "tags" : {
+
+                        },
+                        "slaveDelay" : NumberLong(0),
+                        "votes" : 1
+                },
+                {
+                        "_id" : 2,
+                        "host" : "db3:27017",
+                        "arbiterOnly" : false,
+                        "buildIndexes" : true,
+                        "hidden" : false,
+                        "priority" : 1,
+                        "tags" : {
+
+                        },
+                        "slaveDelay" : NumberLong(0),
+                        "votes" : 1
+                }
+        ],
+        "settings" : {
+                "chainingAllowed" : true,
+                "heartbeatIntervalMillis" : 2000,
+                "heartbeatTimeoutSecs" : 10,
+                "electionTimeoutMillis" : 10000,
+                "catchUpTimeoutMillis" : -1,
+                "catchUpTakeoverDelayMillis" : 30000,
+                "getLastErrorModes" : {
+
+                },
+                "getLastErrorDefaults" : {
+                        "w" : 1,
+                        "wtimeout" : 0
+                },
+                "replicaSetId" : ObjectId("6079e90135b76103e810ebc3")
+        }
+}
+</span><span class="gp">rs0:PRIMARY&gt;</span><span class="w"> </span>rs.status<span class="o">()</span>
+<span class="go">{
+        "set" : "rs0",
+        "date" : ISODate("2021-04-16T19:45:05.734Z"),
+        "myState" : 1,
+        "term" : NumberLong(1),
+        "syncSourceHost" : "",
+        "syncSourceId" : -1,
+        "heartbeatIntervalMillis" : NumberLong(2000),
+        "majorityVoteCount" : 2,
+        "writeMajorityCount" : 2,
+        "votingMembersCount" : 3,
+        "writableVotingMembersCount" : 3,
+        "optimes" : {
+                "lastCommittedOpTime" : {
+                        "ts" : Timestamp(1618602302, 1),
+                        "t" : NumberLong(1)
+                },
+                "lastCommittedWallTime" : ISODate("2021-04-16T19:45:02.145Z"),
+                "readConcernMajorityOpTime" : {
+                        "ts" : Timestamp(1618602302, 1),
+                        "t" : NumberLong(1)
+                },
+                "readConcernMajorityWallTime" : ISODate("2021-04-16T19:45:02.145Z"),
+                "appliedOpTime" : {
+                        "ts" : Timestamp(1618602302, 1),
+                        "t" : NumberLong(1)
+                },
+                "durableOpTime" : {
+                        "ts" : Timestamp(1618602302, 1),
+                        "t" : NumberLong(1)
+                },
+                "lastAppliedWallTime" : ISODate("2021-04-16T19:45:02.145Z"),
+                "lastDurableWallTime" : ISODate("2021-04-16T19:45:02.145Z")
+        },
+        "lastStableRecoveryTimestamp" : Timestamp(1618602302, 1),
+        "electionCandidateMetrics" : {
+                "lastElectionReason" : "electionTimeout",
+                "lastElectionDate" : ISODate("2021-04-16T19:44:02.092Z"),
+                "electionTerm" : NumberLong(1),
+                "lastCommittedOpTimeAtElection" : {
+                        "ts" : Timestamp(0, 0),
+                        "t" : NumberLong(-1)
+                },
+                "lastSeenOpTimeAtElection" : {
+                        "ts" : Timestamp(1618602242, 1),
+                        "t" : NumberLong(-1)
+                },
+                "numVotesNeeded" : 1,
+                "priorityAtElection" : 1,
+                "electionTimeoutMillis" : NumberLong(10000),
+                "newTermStartDate" : ISODate("2021-04-16T19:44:02.121Z"),
+                "wMajorityWriteAvailabilityDate" : ISODate("2021-04-16T19:44:02.163Z")
+        },
+        "members" : [
+                {
+                        "_id" : 0,
+                        "name" : "00216464f334:27017",
+                        "health" : 1,
+                        "state" : 1,
+                        "stateStr" : "PRIMARY",
+                        "uptime" : 573,
+                        "optime" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "syncSourceHost" : "",
+                        "syncSourceId" : -1,
+                        "infoMessage" : "Could not find member to sync from",
+                        "electionTime" : Timestamp(1618602242, 2),
+                        "electionDate" : ISODate("2021-04-16T19:44:02Z"),
+                        "configVersion" : 3,
+                        "configTerm" : 1,
+                        "self" : true,
+                        "lastHeartbeatMessage" : ""
+                },
+                {
+                        "_id" : 1,
+                        "name" : "db2:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 44,
+                        "optime" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDurable" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "optimeDurableDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "lastHeartbeat" : ISODate("2021-04-16T19:45:04.401Z"),
+                        "lastHeartbeatRecv" : ISODate("2021-04-16T19:45:04.406Z"),
+                        "pingMs" : NumberLong(0),
+                        "lastHeartbeatMessage" : "",
+                        "syncSourceHost" : "00216464f334:27017",
+                        "syncSourceId" : 0,
+                        "infoMessage" : "",
+                        "configVersion" : 3,
+                        "configTerm" : 1
+                },
+                {
+                        "_id" : 2,
+                        "name" : "db3:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 21,
+                        "optime" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDurable" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "optimeDurableDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "lastHeartbeat" : ISODate("2021-04-16T19:45:04.400Z"),
+                        "lastHeartbeatRecv" : ISODate("2021-04-16T19:45:04.813Z"),
+                        "pingMs" : NumberLong(0),
+                        "lastHeartbeatMessage" : "",
+                        "syncSourceHost" : "db2:27017",
+                        "syncSourceId" : 1,
+                        "infoMessage" : "",
+                        "configVersion" : 3,
+                        "configTerm" : 1
+                }
+        ],
+        "ok" : 1,
+</span><span class="gp">        "$</span>clusterTime<span class="s2">" : {
+</span><span class="go">                "clusterTime" : Timestamp(1618602302, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1618602302, 1)
+}
+</span><span class="gp">rs0:PRIMARY&gt;</span></code></pre>
 </div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Your data directory may be different, check the output of the
-<code>pg_lsclusters</code> run previously.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Sure enough, it looks like things aren&#8217;t working</td>
-</tr>
-</table>
 </div>
 <div class="paragraph">
-<p>Now we&#8217;ll initialize an empty data directory so that PostgreSQL can at least
-start. Once it is created I&#8217;ll also confirm that there is nothing in it. I&#8217;ll do
-this in a shell as the <code>postgres</code> user:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>/usr/lib/postgresql/10/bin/initdb <span class="nt">-D</span> /var/lib/postgresql/10/main <i class="conum" data-value="1"></i><b>(1)</b>
-<span class="go">The files belonging to this database system will be owned by user "postgres".
-This user must also own the server process.
-
-The database cluster will be initialized with locale "C.UTF-8".
-The default database encoding has accordingly been set to "UTF8".
-The default text search configuration will be set to "english".
-
-Data page checksums are disabled.
-
-creating directory /var/lib/postgresql/10/main ... ok
-creating subdirectories ... ok
-selecting default max_connections ... 100
-selecting default shared_buffers ... 128MB
-selecting default timezone ... America/New_York
-selecting dynamic shared memory implementation ... posix
-creating configuration files ... ok
-running bootstrap script ... ok
-performing post-bootstrap initialization ... ok
-syncing data to disk ... ok
-
-WARNING: enabling "trust" authentication for local connections
-You can change this by editing pg_hba.conf or using the option -A, or
---auth-local and --auth-host, the next time you run initdb.
-
-Success. You can now start the database server using:
-
-    /usr/lib/postgresql/10/bin/pg_ctl -D /var/lib/postgresql/10/main -l logfile start
-
-</span><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>service postgresql start <i class="conum" data-value="2"></i><b>(2)</b>
-<span class="go"> * Starting PostgreSQL 10 database server                                                                        [ OK ]
-</span><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>psql
-<span class="go">psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
-Type "help" for help.
-
-</span><span class="gp">postgres=#</span><span class="w"> </span><span class="se">\l</span> <i class="conum" data-value="3"></i><b>(3)</b>
-<span class="go">                              List of databases
-   Name    |  Owner   | Encoding | Collate |  Ctype  |   Access privileges
------------+----------+----------+---------+---------+-----------------------
- postgres  | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
- template0 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres          +
-           |          |          |         |         | postgres=CTc/postgres
- template1 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres          +
-           |          |          |         |         | postgres=CTc/postgres
-(3 rows)
-
-</span><span class="gp">postgres=#</span><span class="w"> </span><span class="se">\q</span></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td><code>initdb</code> is version specific, so if you are running a newer version of
-PostgreSQL it may be in a different directory (of the same pattern). Your
-data directory may also differ.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Now we can restart PostgreSQL.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Finally we can see that all our DBs are gone.</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Let&#8217;s start by recovering from our <em>logical</em> backup, which should work with our
-freshly initialized and empty database:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>xzcat logical.sql.xz | psql
-<span class="gp">&lt;snip&gt;</span><span class="w">
-</span><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>psql
-<span class="go">psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
-Type "help" for help.
-
-</span><span class="gp">postgres=#</span><span class="w"> </span><span class="se">\l</span>
-<span class="go">                                List of databases
-   Name    |  Owner   | Encoding | Collate |  Ctype  |     Access privileges
------------+----------+----------+---------+---------+----------------------------
- movies    | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =Tc/postgres              +
-           |          |          |         |         | postgres=CTc/postgres     +
-           |          |          |         |         | movie_manager=CTc/postgres+
-           |          |          |         |         | movie_rental=c/postgres
- postgres  | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
- template0 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres               +
-           |          |          |         |         | postgres=CTc/postgres
- template1 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | postgres=CTc/postgres     +
-           |          |          |         |         | =c/postgres
-(4 rows)
-
-</span><span class="gp">postgres=#</span><span class="w"> </span><span class="se">\c</span> movies
-<span class="go">You are now connected to database "movies" as user "postgres".
-</span><span class="gp">movies=#</span><span class="w"> </span><span class="se">\d</span>t
-<span class="go">              List of relations
- Schema |       Name       | Type  |  Owner
---------+------------------+-------+----------
- public | actor            | table | postgres
- public | address          | table | postgres
- public | category         | table | postgres
- public | city             | table | postgres
- public | country          | table | postgres
- public | customer         | table | postgres
- public | film             | table | postgres
- public | film_actor       | table | postgres
- public | film_category    | table | postgres
- public | inventory        | table | postgres
- public | language         | table | postgres
- public | payment          | table | postgres
- public | payment_p2020_01 | table | postgres
- public | payment_p2020_02 | table | postgres
- public | payment_p2020_03 | table | postgres
- public | payment_p2020_04 | table | postgres
- public | payment_p2020_05 | table | postgres
- public | payment_p2020_06 | table | postgres
- public | rental           | table | postgres
- public | staff            | table | postgres
- public | store            | table | postgres
-(21 rows)
-
-</span><span class="gp">movies=#</span><span class="w"> </span><span class="se">\q</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Sure enough, our movies database (and any changes we made to the other
-databases) are back. Now we&#8217;ll destroy the data directory again, but this
-time use the <em>physical</em> backup to recover (which will not require the <code>initdb</code>
-command):</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">rm</span> <span class="nt">-r</span> /var/lib/postgresql/10/main <i class="conum" data-value="1"></i><b>(1)</b>
-<span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">mkdir</span> <span class="nt">--mode</span><span class="o">=</span>700 /var/lib/postgresql/10/main <i class="conum" data-value="2"></i><b>(2)</b>
-<span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span><span class="nb">tar </span>Jxvf physical.tar.xz <span class="nt">-C</span> /var/lib/postgresql/10/main <span class="nt">--strip-components</span><span class="o">=</span>1 <i class="conum" data-value="3"></i><b>(3)</b>
-<span class="gp">&lt;snip&gt;</span><span class="w">
-</span><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>service postgresql start
-<span class="go"> * Starting PostgreSQL 10 database server                                                                        [ OK ]
-</span><span class="gp">postgres@R90VJ3MK:/tmp$</span><span class="w"> </span>psql
-<span class="go">psql (10.15 (Ubuntu 10.15-0ubuntu0.18.04.1))
-Type "help" for help.
-
-</span><span class="gp">postgres=#</span><span class="w"> </span><span class="se">\l</span>
-<span class="go">                                List of databases
-   Name    |  Owner   | Encoding | Collate |  Ctype  |     Access privileges
------------+----------+----------+---------+---------+----------------------------
- movies    | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =Tc/postgres              +
-           |          |          |         |         | postgres=CTc/postgres     +
-           |          |          |         |         | movie_manager=CTc/postgres+
-           |          |          |         |         | movie_rental=c/postgres
- postgres  | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
- template0 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres               +
-           |          |          |         |         | postgres=CTc/postgres
- template1 | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres               +
-           |          |          |         |         | postgres=CTc/postgres
-(4 rows)
-
-</span><span class="gp">postgres=#</span><span class="w"> </span><span class="se">\c</span> movies
-<span class="go">You are now connected to database "movies" as user "postgres".
-</span><span class="gp">movies=#</span><span class="w"> </span><span class="se">\d</span>t
-<span class="go">              List of relations
- Schema |       Name       | Type  |  Owner
---------+------------------+-------+----------
- public | actor            | table | postgres
- public | address          | table | postgres
- public | category         | table | postgres
- public | city             | table | postgres
- public | country          | table | postgres
- public | customer         | table | postgres
- public | film             | table | postgres
- public | film_actor       | table | postgres
- public | film_category    | table | postgres
- public | inventory        | table | postgres
- public | language         | table | postgres
- public | payment          | table | postgres
- public | payment_p2020_01 | table | postgres
- public | payment_p2020_02 | table | postgres
- public | payment_p2020_03 | table | postgres
- public | payment_p2020_04 | table | postgres
- public | payment_p2020_05 | table | postgres
- public | payment_p2020_06 | table | postgres
- public | rental           | table | postgres
- public | staff            | table | postgres
- public | store            | table | postgres
-(21 rows)
-
-</span><span class="gp">movies=#</span><span class="w"> </span><span class="se">\q</span></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Remove the old data directory.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Data directories must be only readable by the postgres user.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>We uncompress this tar archive in the data directory, <code>-C</code>, and we strip
-of the first part of all paths, <code>--strip-components</code>, which for us is the
-<code>physical</code> directory we included in our archive.</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Sure enough, this method also recovered our database and all tables.</p>
+<p>Use the information from the <code>status</code> and <code>conf</code> commands to answer the
+questions. When you are done, you can enter Ctrl-C in the terminal running
+docker compose to shut everything down.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_questions">Questions</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Answer these questions as your submission for this exercise:</p>
-</div>
 <div class="qlist qanda">
 <ol>
 <li>
-<p><em>What is the difference between a <em>logical</em> and <em>physical</em> database backup?</em></p>
+<p><em>How many nodes are in this cluster?</em></p>
 <p></p>
 </li>
 <li>
-<p><em>In your experience, which type of back up takes up more space?</em></p>
+<p><em>What is the <code>id</code> of the <code>PRIMARY</code> node?</em></p>
 <p></p>
 </li>
 <li>
-<p><em>In your experience, which type of back up is easier to recover from? Why?</em></p>
+<p><em>What is the name of our replica set?</em></p>
+<p></p>
+</li>
+<li>
+<p><em>What is the purpose of the <code>HeartbeatMessage</code>?</em></p>
 <p></p>
 </li>
 </ol>
@@ -1106,7 +1064,7 @@ of the first part of all paths, <code>--strip-components</code>, which for us is
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-12 18:20:58 UTC
+Last updated 2021-04-16 21:27:46 UTC
 </div>
 </div>
 </body>

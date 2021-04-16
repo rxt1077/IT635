@@ -1,4 +1,4 @@
-movieValidator = {
+filmValidator = {
   $jsonSchema: {
     bsonType: "object",
     required: [ "Actors", "Category", "Description", "Length", "Rating",

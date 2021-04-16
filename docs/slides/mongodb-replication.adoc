@@ -1,0 +1,51 @@
+= Replication in MongoDB
+
+== MongoDB Advantages
+
+* Modern database
+* High availability from the beginning, not an afterthought
+* Failover is built in
+* Architecture is consistent
+* Popular among developers
+* Well documented / widely used (as far as NoSQL DBs go)
+
+== https://docs.mongodb.com/manual/replication/[Replication in MongoDB]
+
+* Replica set - a group of nodes that maintain the same data
+* Everyone is NOT equal
+* Data bearing nodes and optionally an arbiter node
+* ONE data bearing node is the primary which can confirm writes
+* Primary node records all transactions to a log (oplog)
+
+== Architecture
+
+image::rep1.svg[]
+
+== Inter-node Communication
+
+image::rep2.svg[]
+
+[.shrink]
+* Secondaries follow the oplog and perform the transactions to replicate the data
+* A heartbeat is maintained to see if the primary becomes unavailable
+* If the primary is unavailable an election is held to promote a secondary to primary
+
+== Arbiters
+
+image::rep3.svg[]
+
+* Arbiters have no data and can resolve ties
+* They CANNOT become a primary or a secondary
+
+== Automatic Failover
+
+* If there is no communication with the primary for more the
+  electionTimeoutMillis (10 s by default) a secondary calls an election to
+  nominate itself as a primary.
+* There are NO WRITES processed during an election (remember everything is
+  asynchronous), but reads may still occur.
+* THIS SHOULD NOT TAKE MORE THAN 12 SECONDS!
+
+== Failover
+
+image::rep4.svg[]
