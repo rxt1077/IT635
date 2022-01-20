@@ -93,11 +93,43 @@ image::codd.png[]
 * Scalability and security
 * Availability of support and software
 
+== SQLite
+
+image::sqlite.svg[width=33%]
+
+[.shrink]
+* Most popular relational database in the world
+* Tiny, single-user, meant for embedded/small applications
+* Found on phones, routers, and other appliances
+* Everything stored in one file, supports most SQL commands
+
+== MySQL
+
+image::mysql.png[width=33%]
+
+[.shrink]
+* Open-source relational database
+* Very popular for web applications
+* The M in LAMP stack
+* Designed to be fast, stable, multi-threaded, multi-user
+* Does what a dev needs
+
+== MariaDB
+
+image::mariadb.png[width=33%]
+
+[.shrink]
+* Fork of MySQL (when it was bought by Oracle)
+* MySQL compatible
+* Commonly used by groups concerned about MySQL licensing
+
 == PostgreSQL
+
+image::postgresql.png[width=33%]
 
 * Powerful, open source _object_-relational database
 * Academic roots
-* Growing in popularity (take that MySQL!)
+* Growing in popularity
 * Consistent
 
 [.columns]
