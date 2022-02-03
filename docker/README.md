@@ -13,7 +13,7 @@ Use a new terminal to run the client.
 ## Running a shell
 
 This class will use both Linux and psql commands to complete the exercises.
-As such, it is easiest to simply exec a BASH shell on the running `docker-db-1` container by running the command `docker exec docker-db-1 bash` from within this directory.
+As such, it is easiest to simply exec a BASH shell on the running `db` service by running the command `docker exec db bash` from within this directory.
 Docker will default to giving you a root shell, but if you need to be the postgres user you can run the command `su postgres` (this image does not have sudo installed).
 
 ## Copying files between container and host
