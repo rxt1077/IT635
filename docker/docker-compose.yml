@@ -1,0 +1,12 @@
+services:
+  db:
+    build: db
+    environment:
+      POSTGRES_PASSWORD: testing
+      POSTGRES_DB: movies
+    volumes:
+      - it635-db:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./shared:/shared
+volumes:
+  it635-db:
