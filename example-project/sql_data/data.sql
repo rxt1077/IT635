@@ -1,0 +1,15 @@
+INSERT INTO customers VALUES (0, 'East Windsor Police Department', '80 1 Mile Road', 'East Windsor', 'NJ', '08520', '6094485678');
+INSERT INTO customers VALUES (1, 'West Windsor Police Department', '20 Municipal Drive', 'West Windsor', 'NJ', '08550', '6097991222');
+INSERT INTO customers VALUES (2, 'New Brunswick Police Department', '25 Kirkpatrick Street', 'New Brunswick', 'NJ', '08901', '7327455200');
+INSERT INTO manufacturers VALUES (0, 'Goodtime Auto', '123 Madeup Road', 'Trenton', 'NJ', '08619', '6095555555');
+INSERT INTO manufacturers VALUES (1, 'Badtime Auto', '321 Legit Drive', 'Newark', 'NJ', '07101', '7325555555');
+INSERT INTO manufacturers VALUES (2, 'Freedom Car Parts', '1 Buckleberry Ave.', 'Camden', 'NJ', '08030', '1234567890');
+INSERT INTO parts VALUES (0, 'Windshield Wipers', 'Rubber things for removing rain', 2);
+INSERT INTO parts VALUES (1, 'Tires', 'Rubber things for going', 1);
+INSERT INTO parts VALUES (2, 'Brake Pads', 'Metal things for stopping', 0);
+INSERT INTO orders VALUES (0, 0, 1, 10);
+INSERT INTO orders VALUES (0, 1, 1, 20);
+INSERT INTO orders VALUES (0, 2, 1, 2);
+INSERT INTO orders VALUES (1, 0, 2, 2);
+INSERT INTO orders VALUES (1, 2, 2, 2);
+INSERT INTO orders VALUES (2, 1, 0, 40);
