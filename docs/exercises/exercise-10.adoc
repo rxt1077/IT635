@@ -1,0 +1,375 @@
+= Exercise 9
+
+In this exercise, we will see one of the major advantages of using a NoSQL DB:
+ease of replication.
+
+Since we will need multiple servers running, we will use Docker for this
+exercise. If you don't have Docker installed, you can download and install it
+here: https://docs.docker.com/get-docker/
+
+== Creating a Basic Docker Compose File
+
+In an empty directory, create the following file:
+
+.docker-compose.yml
+[source, yml]
+----
+version: '3.1'
+services:
+    db1:
+        image: mongo
+        command: --replSet "rs0"
+    db2:
+        image: mongo
+        command: --replSet "rs0"
+    db3:
+        image: mongo
+        command: --replSet "rs0"
+----
+
+This tells docker compose that you want to start three DB services, each with
+`--replSet "rs0"` passed to the `mongod` command when they start. Each of these
+services will use the https://hub.docker.com/_/mongo[Docker Hub mongo image].
+
+== Running and Building the Replica Set
+
+You should now be able to start the system by running `docker-compose up`:
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ docker-compose up
+Creating network "tmp_default" with the default driver
+Pulling db1 (mongo:)...
+latest: Pulling from library/mongo
+6e0aa5e7af40: Pull complete
+d47239a868b3: Pull complete
+49cbb10cca85: Pull complete
+9729d7ec22de: Pull complete
+7b7fd72268d8: Pull complete
+5e2934dacaf5: Pull complete
+bf9da24d4b2c: Pull complete
+d2f8c3715616: Pull complete
+e9f96a4a45b0: Pull complete
+bd66718f31e2: Pull complete
+41ed4d1a1542: Pull complete
+7336dfc228e2: Pull complete
+Digest: sha256:b66f48968d757262e5c29979e6aa3af944d4ef166314146e1b3a788f0d191ac3
+Status: Downloaded newer image for mongo:latest
+Creating tmp_db2_1 ... done
+Creating tmp_db1_1 ... done
+Creating tmp_db3_1 ... done
+Attaching to tmp_db1_1, tmp_db2_1, tmp_db3_1
+db2_1  | {"t":{"$date":"2021-04-16T19:35:32.409+00:00"},"s":"I",  "c":"CONTROL",  "id":23285,   "ctx":"main","msg":"Automatically disabling TLS 1.0, to forc
+e-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
+db3_1  | {"t":{"$date":"2021-04-16T19:35:32.421+00:00"},"s":"I",  "c":"CONTROL",  "id":23285,   "ctx":"main","msg":"Automatically disabling TLS 1.0, to forc
+e-enable TLS 1.0 specify --sslDisabledProtocols 'none'"}
+db1_1  | {"t":{"$date":"2021-04-16T19:35:32.424+00:00"},"s":"I",  "c":"CONTROL",  "id":23285,   "ctx":"main","msg":"Automatically disabling TLS 1.0, to forc
+<snip>
+----
+
+Now open _another terminal_ and _cd into the same directory_. From that
+terminal we will run the mongo console on db1 and connect to db1:
+
+[source, console]
+----
+ryan@R90VJ3MK:/tmp$ docker-compose run db1 mongo --host db1
+Creating tmp_db1_run ... done
+MongoDB shell version v4.4.5
+connecting to: mongodb://db1:27017/?compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("230754ad-6ecb-4167-9ac0-78c8751f5a79") }
+MongoDB server version: 4.4.5
+Welcome to the MongoDB shell.
+For interactive help, type "help".
+For more comprehensive documentation, see
+        https://docs.mongodb.com/
+Questions? Try the MongoDB Developer Community Forums
+        https://community.mongodb.com
+---
+The server generated these startup warnings when booting:
+        2021-04-16T19:35:32.436+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/co
+re/prodnotes-filesystem
+        2021-04-16T19:35:33.346+00:00: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+        2021-04-16T19:35:33.346+00:00: /sys/kernel/mm/transparent_hugepage/enabled is 'always'. We suggest setting it to 'never'
+---
+---
+        Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+        metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+        The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+        and anyone you share the URL with. MongoDB may use this information to make product
+        improvements and to suggest MongoDB products and deployment options to you.
+
+        To enable free monitoring, run the following command: db.enableFreeMonitoring()
+        To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+>
+----
+
+From this mongo shell prompt we will initiate a replica set, add db2 and db3,
+and print out information about the cluster:
+
+[source, console]
+----
+> rs.initiate()
+{
+        "info2" : "no configuration specified. Using a default configuration for the set",
+        "me" : "00216464f334:27017",
+        "ok" : 1,
+        "$clusterTime" : {
+                "clusterTime" : Timestamp(1618602242, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1618602242, 1)
+}
+rs0:SECONDARY> rs.add("db2")
+{
+        "ok" : 1,
+        "$clusterTime" : {
+                "clusterTime" : Timestamp(1618602261, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1618602261, 1)
+}
+rs0:PRIMARY> rs.add("db3")
+{
+        "ok" : 1,
+        "$clusterTime" : {
+                "clusterTime" : Timestamp(1618602284, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1618602284, 1)
+}
+rs0:PRIMARY> rs.conf()
+{
+        "_id" : "rs0",
+        "version" : 3,
+        "term" : 1,
+        "protocolVersion" : NumberLong(1),
+        "writeConcernMajorityJournalDefault" : true,
+        "members" : [
+                {
+                        "_id" : 0,
+                        "host" : "00216464f334:27017",
+                        "arbiterOnly" : false,
+                        "buildIndexes" : true,
+                        "hidden" : false,
+                        "priority" : 1,
+                        "tags" : {
+
+                        },
+                        "slaveDelay" : NumberLong(0),
+                        "votes" : 1
+                },
+                {
+                        "_id" : 1,
+                        "host" : "db2:27017",
+                        "arbiterOnly" : false,
+                        "buildIndexes" : true,
+                        "hidden" : false,
+                        "priority" : 1,
+                        "tags" : {
+
+                        },
+                        "slaveDelay" : NumberLong(0),
+                        "votes" : 1
+                },
+                {
+                        "_id" : 2,
+                        "host" : "db3:27017",
+                        "arbiterOnly" : false,
+                        "buildIndexes" : true,
+                        "hidden" : false,
+                        "priority" : 1,
+                        "tags" : {
+
+                        },
+                        "slaveDelay" : NumberLong(0),
+                        "votes" : 1
+                }
+        ],
+        "settings" : {
+                "chainingAllowed" : true,
+                "heartbeatIntervalMillis" : 2000,
+                "heartbeatTimeoutSecs" : 10,
+                "electionTimeoutMillis" : 10000,
+                "catchUpTimeoutMillis" : -1,
+                "catchUpTakeoverDelayMillis" : 30000,
+                "getLastErrorModes" : {
+
+                },
+                "getLastErrorDefaults" : {
+                        "w" : 1,
+                        "wtimeout" : 0
+                },
+                "replicaSetId" : ObjectId("6079e90135b76103e810ebc3")
+        }
+}
+rs0:PRIMARY> rs.status()
+{
+        "set" : "rs0",
+        "date" : ISODate("2021-04-16T19:45:05.734Z"),
+        "myState" : 1,
+        "term" : NumberLong(1),
+        "syncSourceHost" : "",
+        "syncSourceId" : -1,
+        "heartbeatIntervalMillis" : NumberLong(2000),
+        "majorityVoteCount" : 2,
+        "writeMajorityCount" : 2,
+        "votingMembersCount" : 3,
+        "writableVotingMembersCount" : 3,
+        "optimes" : {
+                "lastCommittedOpTime" : {
+                        "ts" : Timestamp(1618602302, 1),
+                        "t" : NumberLong(1)
+                },
+                "lastCommittedWallTime" : ISODate("2021-04-16T19:45:02.145Z"),
+                "readConcernMajorityOpTime" : {
+                        "ts" : Timestamp(1618602302, 1),
+                        "t" : NumberLong(1)
+                },
+                "readConcernMajorityWallTime" : ISODate("2021-04-16T19:45:02.145Z"),
+                "appliedOpTime" : {
+                        "ts" : Timestamp(1618602302, 1),
+                        "t" : NumberLong(1)
+                },
+                "durableOpTime" : {
+                        "ts" : Timestamp(1618602302, 1),
+                        "t" : NumberLong(1)
+                },
+                "lastAppliedWallTime" : ISODate("2021-04-16T19:45:02.145Z"),
+                "lastDurableWallTime" : ISODate("2021-04-16T19:45:02.145Z")
+        },
+        "lastStableRecoveryTimestamp" : Timestamp(1618602302, 1),
+        "electionCandidateMetrics" : {
+                "lastElectionReason" : "electionTimeout",
+                "lastElectionDate" : ISODate("2021-04-16T19:44:02.092Z"),
+                "electionTerm" : NumberLong(1),
+                "lastCommittedOpTimeAtElection" : {
+                        "ts" : Timestamp(0, 0),
+                        "t" : NumberLong(-1)
+                },
+                "lastSeenOpTimeAtElection" : {
+                        "ts" : Timestamp(1618602242, 1),
+                        "t" : NumberLong(-1)
+                },
+                "numVotesNeeded" : 1,
+                "priorityAtElection" : 1,
+                "electionTimeoutMillis" : NumberLong(10000),
+                "newTermStartDate" : ISODate("2021-04-16T19:44:02.121Z"),
+                "wMajorityWriteAvailabilityDate" : ISODate("2021-04-16T19:44:02.163Z")
+        },
+        "members" : [
+                {
+                        "_id" : 0,
+                        "name" : "00216464f334:27017",
+                        "health" : 1,
+                        "state" : 1,
+                        "stateStr" : "PRIMARY",
+                        "uptime" : 573,
+                        "optime" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "syncSourceHost" : "",
+                        "syncSourceId" : -1,
+                        "infoMessage" : "Could not find member to sync from",
+                        "electionTime" : Timestamp(1618602242, 2),
+                        "electionDate" : ISODate("2021-04-16T19:44:02Z"),
+                        "configVersion" : 3,
+                        "configTerm" : 1,
+                        "self" : true,
+                        "lastHeartbeatMessage" : ""
+                },
+                {
+                        "_id" : 1,
+                        "name" : "db2:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 44,
+                        "optime" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDurable" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "optimeDurableDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "lastHeartbeat" : ISODate("2021-04-16T19:45:04.401Z"),
+                        "lastHeartbeatRecv" : ISODate("2021-04-16T19:45:04.406Z"),
+                        "pingMs" : NumberLong(0),
+                        "lastHeartbeatMessage" : "",
+                        "syncSourceHost" : "00216464f334:27017",
+                        "syncSourceId" : 0,
+                        "infoMessage" : "",
+                        "configVersion" : 3,
+                        "configTerm" : 1
+                },
+                {
+                        "_id" : 2,
+                        "name" : "db3:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 21,
+                        "optime" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDurable" : {
+                                "ts" : Timestamp(1618602302, 1),
+                                "t" : NumberLong(1)
+                        },
+                        "optimeDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "optimeDurableDate" : ISODate("2021-04-16T19:45:02Z"),
+                        "lastHeartbeat" : ISODate("2021-04-16T19:45:04.400Z"),
+                        "lastHeartbeatRecv" : ISODate("2021-04-16T19:45:04.813Z"),
+                        "pingMs" : NumberLong(0),
+                        "lastHeartbeatMessage" : "",
+                        "syncSourceHost" : "db2:27017",
+                        "syncSourceId" : 1,
+                        "infoMessage" : "",
+                        "configVersion" : 3,
+                        "configTerm" : 1
+                }
+        ],
+        "ok" : 1,
+        "$clusterTime" : {
+                "clusterTime" : Timestamp(1618602302, 1),
+                "signature" : {
+                        "hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+                        "keyId" : NumberLong(0)
+                }
+        },
+        "operationTime" : Timestamp(1618602302, 1)
+}
+rs0:PRIMARY>
+----
+
+Use the information from the `status` and `conf` commands to answer the
+questions. When you are done, you can enter Ctrl-C in the terminal running
+docker compose to shut everything down.
+
+== Questions
+
+[qanda]
+How many nodes are in this cluster?::
+  {empty}
+What is the `id` of the `PRIMARY` node?::
+  {empty}
+What is the name of our replica set?::
+  {empty}
+What is the purpose of the `HeartbeatMessage`?::
+  {empty}

@@ -1,0 +1,60 @@
+= Building Databases from Real-World Sources
+
+== Problems
+
+* Cleaning data is usually the most difficult part of setting up a database
+* The human element makes this particularly difficult
+* Multiple files
+* Inconsistent format
+* Typos
+
+== Manual Entry
+
+* Manual entry is an option but may result in errors within the DB
+* A database will enforce stricter formatting, but that doesn't catch all errors
+
+== Command Line Tools
+
+* https://www.geeksforgeeks.org/sed-command-in-linux-unix-with-examples/[sed]
+* https://www.geeksforgeeks.org/awk-command-unixlinux-examples/[awk]
+* https://www.cyberciti.biz/faq/howto-use-grep-command-in-linux-unix/[grep]
+* head/tail/cut/sort/uniq
+
+== Python
+
+* Tons of useful libraries
+* Can be interactive or standalone
+* Can connect directly to the DB or generate files for import
+* Python datastructures can represent complex relationships
+
+=== csv
+
+* default library for easily writing/reading CSV files
+* https://docs.python.org/3/library/csv.html[good documentation]
+* lots of options
+
+=== Excel
+
+* libraries exist for xls and https://openpyxl.readthedocs.io/en/stable/[xlxs] files
+* can access basic data from spreadsheets
+
+=== pprint
+
+* Pretty Printer
+* good for showing complex Python datastructures
+* less painful when checking results
+
+=== re
+
+* Built-in regular expression library
+* https://regexone.com/[Learning regex can be very useful for scraping data]
+* Can't solve everything, but can make your life easier
+
+== Tips
+
+* Watch out for inconsistencies before importing
+* Check and double-check
+* Test random entries in large datasets
+* Watch out for capitalization
+* Not all the data may be there!
+* Build Python datastructures _then_ generate DB rows

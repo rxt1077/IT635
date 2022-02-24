@@ -1,3 +1,4 @@
 .vagrant
 *.log
 mysql-db
+virtual_env

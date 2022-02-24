@@ -50,7 +50,13 @@ image::hash.svg[]
 
 * Takes time to build and keep up to date
 * In general you should remove indexes that aren't used
-* You _can_ build partial indexes if needed
+
+== Partial Indexes
+
+* You can get around some downsides with partial indexes
+* A partial index is an index with a `WHERE` clause, it just acts on a subset of the data
+* This takes up less space
+* `CREATE INDEX articles_flagged_created_at_index ON articles(created_at) WHERE flagged IS TRUE;`
 
 == Timing Queries
 
