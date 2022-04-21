@@ -1,4 +1,4 @@
-= Exercise 9
+= Exercise 10 
 
 In this exercise, we will see one of the major advantages of using a NoSQL DB:
 ease of replication.

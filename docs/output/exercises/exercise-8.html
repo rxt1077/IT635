@@ -436,42 +436,396 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+pre.rouge table td { padding: 5px; }
+pre.rouge table pre { margin: 0; }
+pre.rouge .cm {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cp {
+  color: #999999;
+  font-weight: bold;
+}
+pre.rouge .c1 {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .cs {
+  color: #999999;
+  font-weight: bold;
+  font-style: italic;
+}
+pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cpf {
+  color: #999988;
+  font-style: italic;
+}
+pre.rouge .err {
+  color: #a61717;
+  background-color: #e3d2d2;
+}
+pre.rouge .gd {
+  color: #000000;
+  background-color: #ffdddd;
+}
+pre.rouge .ge {
+  color: #000000;
+  font-style: italic;
+}
+pre.rouge .gr {
+  color: #aa0000;
+}
+pre.rouge .gh {
+  color: #999999;
+}
+pre.rouge .gi {
+  color: #000000;
+  background-color: #ddffdd;
+}
+pre.rouge .go {
+  color: #888888;
+}
+pre.rouge .gp {
+  color: #555555;
+}
+pre.rouge .gs {
+  font-weight: bold;
+}
+pre.rouge .gu {
+  color: #aaaaaa;
+}
+pre.rouge .gt {
+  color: #aa0000;
+}
+pre.rouge .kc {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kd {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kn {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kp {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kr {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .kt {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .k, pre.rouge .kv {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .mf {
+  color: #009999;
+}
+pre.rouge .mh {
+  color: #009999;
+}
+pre.rouge .il {
+  color: #009999;
+}
+pre.rouge .mi {
+  color: #009999;
+}
+pre.rouge .mo {
+  color: #009999;
+}
+pre.rouge .m, pre.rouge .mb, pre.rouge .mx {
+  color: #009999;
+}
+pre.rouge .sa {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .sb {
+  color: #d14;
+}
+pre.rouge .sc {
+  color: #d14;
+}
+pre.rouge .sd {
+  color: #d14;
+}
+pre.rouge .s2 {
+  color: #d14;
+}
+pre.rouge .se {
+  color: #d14;
+}
+pre.rouge .sh {
+  color: #d14;
+}
+pre.rouge .si {
+  color: #d14;
+}
+pre.rouge .sx {
+  color: #d14;
+}
+pre.rouge .sr {
+  color: #009926;
+}
+pre.rouge .s1 {
+  color: #d14;
+}
+pre.rouge .ss {
+  color: #990073;
+}
+pre.rouge .s, pre.rouge .dl {
+  color: #d14;
+}
+pre.rouge .na {
+  color: #008080;
+}
+pre.rouge .bp {
+  color: #999999;
+}
+pre.rouge .nb {
+  color: #0086B3;
+}
+pre.rouge .nc {
+  color: #445588;
+  font-weight: bold;
+}
+pre.rouge .no {
+  color: #008080;
+}
+pre.rouge .nd {
+  color: #3c5d5d;
+  font-weight: bold;
+}
+pre.rouge .ni {
+  color: #800080;
+}
+pre.rouge .ne {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nf, pre.rouge .fm {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nl {
+  color: #990000;
+  font-weight: bold;
+}
+pre.rouge .nn {
+  color: #555555;
+}
+pre.rouge .nt {
+  color: #000080;
+}
+pre.rouge .vc {
+  color: #008080;
+}
+pre.rouge .vg {
+  color: #008080;
+}
+pre.rouge .vi {
+  color: #008080;
+}
+pre.rouge .nv, pre.rouge .vm {
+  color: #008080;
+}
+pre.rouge .ow {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .o {
+  color: #000000;
+  font-weight: bold;
+}
+pre.rouge .w {
+  color: #bbbbbb;
+}
+pre.rouge {
+  background-color: #f8f8f8;
+}
+</style>
 </head>
 <body class="article">
 <div id="header">
 <h1>Exercise 8</h1>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>Create a MongoDB validator for the <code>customers</code> collection. It <em>does not</em> have
-to validate their rentals array (although you can try if you like). Apply that
-validator to the <code>customers</code> collection and test it by adding a valid customer
-and an invalid customer.</p>
+<p>In this exercise we will be:</p>
 </div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Creating a new DB for our DVD rental information</p>
+</li>
+<li>
+<p>Exporting our old DB to BSON</p>
+</li>
+<li>
+<p>Importing that BSON into the new DB</p>
+</li>
+<li>
+<p>Deleting the collections in the old DB</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_exporting">Exporting</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>When you are finished, answer the following questions in the text box provided
-by the assignment on Canvas:</p>
+<p>When we imported our movie rental data, it automatically went into the default
+<code>test</code> database. Let&#8217;s export that data from the system shell (not mongo shell)
+to BSON now:</p>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>mongodump <span class="nt">--archive</span><span class="o">=</span><span class="s2">"test.bson"</span> <span class="nt">--db</span><span class="o">=</span><span class="s2">"test"</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="go">2021-03-26T12:51:13.720-0400    writing test.films to archive 'test.bson'
+2021-03-26T12:51:13.720-0400    writing test.customers to archive 'test.bson'
+2021-03-26T12:51:13.720-0400    writing test.stores to archive 'test.bson'
+2021-03-26T12:51:13.724-0400    done dumping test.stores (2 documents)
+2021-03-26T12:51:13.730-0400    done dumping test.films (1000 documents)
+2021-03-26T12:51:13.738-0400    done dumping test.customers (599 documents)</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>notice I&#8217;m in the tmp directory to make sure there are no permission issues</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_importing">Importing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now let&#8217;s import that BSON data into a <em>new</em> DB named <code>movies</code>. This DB will be
+created automatically. The <code>nsFrom</code> and <code>nsTo</code> commands are used to rewrite a
+namespace, which in our case is changing the DB from <code>test</code> to <code>movies</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>mongorestore <span class="nt">--archive</span><span class="o">=</span><span class="s2">"test.bson"</span> <span class="nt">--nsFrom</span><span class="o">=</span><span class="s1">'test.*'</span> <span class="nt">--nsTo</span><span class="o">=</span><span class="s1">'movies.*'</span>
+<span class="go">2021-03-26T12:54:57.739-0400    preparing collections to restore from
+2021-03-26T12:54:57.760-0400    reading metadata for movies.stores from archive 'test.bson'
+2021-03-26T12:54:57.780-0400    restoring movies.stores from archive 'test.bson'
+2021-03-26T12:54:57.790-0400    no indexes to restore
+2021-03-26T12:54:57.791-0400    finished restoring movies.stores (2 documents)
+2021-03-26T12:54:57.793-0400    reading metadata for movies.films from archive 'test.bson'
+2021-03-26T12:54:57.815-0400    restoring movies.films from archive 'test.bson'
+2021-03-26T12:54:57.829-0400    reading metadata for movies.customers from archive 'test.bson'
+2021-03-26T12:54:57.849-0400    restoring movies.customers from archive 'test.bson'
+2021-03-26T12:54:57.853-0400    no indexes to restore
+2021-03-26T12:54:57.853-0400    finished restoring movies.films (1000 documents)
+2021-03-26T12:54:57.885-0400    no indexes to restore
+2021-03-26T12:54:57.885-0400    finished restoring movies.customers (599 documents)
+2021-03-26T12:54:57.885-0400    done</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_deleting_the_old_collections">Deleting the Old Collections</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that we have everything in our new <code>movies</code> DB we will delete the
+collections we added to the <code>test</code> DB last week. It is pretty standard to have
+a <code>test</code> DB so we will keep the DB and just remove the collections:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>mongo <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="go">MongoDB shell version v3.6.3
+connecting to: mongodb://127.0.0.1:27017
+MongoDB server version: 3.6.3
+Server has startup warnings:
+2021-03-26T12:24:20.538-0400 I STORAGE  [initandlisten]
+2021-03-26T12:24:20.538-0400 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
+2021-03-26T12:24:20.538-0400 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
+2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
+</span><span class="gp">&gt;</span><span class="w"> </span>show dbs
+<span class="go">admin   0.000GB
+config  0.000GB
+local   0.000GB
+movies  0.002GB
+test    0.002GB
+</span><span class="gp">&gt;</span><span class="w"> </span>use <span class="nb">test</span>
+<span class="go">switched to db test
+</span><span class="gp">&gt;</span><span class="w"> </span>show collections
+<span class="go">customers
+films
+stores
+</span><span class="gp">&gt;</span><span class="w"> </span>db.customers.remove<span class="o">({})</span> <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="go">WriteResult({ "nRemoved" : 599 })
+</span><span class="gp">&gt;</span><span class="w"> </span>db.films.remove<span class="o">({})</span>
+<span class="go">WriteResult({ "nRemoved" : 1000 })
+</span><span class="gp">&gt;</span><span class="w"> </span>db.stores.remove<span class="o">({})</span>
+<span class="go">WriteResult({ "nRemoved" : 2 })
+</span><span class="gp">&gt;</span><span class="w"> </span>quit<span class="o">()</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Notice how we are working <em>within</em> the mongo shell here</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Remove takes a query document as a parameter, specify what kinds of
+documents to remove. The empty document, <code>{}</code>, removes all documents in
+the collection.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_questions">Questions</h2>
+<div class="sectionbody">
 <div class="qlist qanda">
 <ol>
 <li>
-<p><em>What was the most difficult aspect of this exercise?</em></p>
+<p><em>Now that you have used it for some basic administrative tasks, what differences do you notice between MongoDB and PostgreSQL?</em></p>
 <p></p>
 </li>
 <li>
-<p><em>Compare and contrast MongoDB schema validation with PostgreSQL integrity constraints.</em></p>
+<p><em>What is the <em>basic</em> difference between BSON and JSON?</em></p>
 <p></p>
 </li>
 <li>
-<p><em>Many argue that validation is <em>best</em> performed at the application level, why does it also make sense to have it available at the DBMS level?</em></p>
+<p><em>If a DB in PostgreSQL is equivalent to a DB in MongoDB, what are tables and rows from PostgreSQL equivalent to in MongoDB?</em></p>
 <p></p>
 </li>
 </ol>
 </div>
 </div>
+</div>
+</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-09 19:27:16 UTC
+Last updated 2022-03-24 20:41:15 UTC
 </div>
 </div>
 </body>

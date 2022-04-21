@@ -1,4 +1,4 @@
-= Exercise 6
+= Exercise 7
 
 In this exercise, we will be:
 
@@ -13,29 +13,10 @@ In this exercise, we will be:
 
 === WSL2 on Windows
 
-We can use the `apt-get install` command to install the community edition of MongoDB:
-
-[source, console]
-----
-ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo apt-get install mongodb
-[sudo] password for ryan:
-Reading package lists... Done
-Building dependency tree
-Reading state information... Done
-The following additional packages will be installed:
-  libboost-filesystem1.65.1 libboost-iostreams1.65.1 libboost-program-options1.65.1 libboost-system1.65.1 libgoogle-perftools4 libsnappy1v5 libstemmer0d libtcmalloc-minimal4 libyaml-cpp0.5v5 mongo-tools
-  mongodb-clients mongodb-server mongodb-server-core
-The following NEW packages will be installed:
-  libboost-filesystem1.65.1 libboost-iostreams1.65.1 libboost-program-options1.65.1 libboost-system1.65.1 libgoogle-perftools4 libsnappy1v5 libstemmer0d libtcmalloc-minimal4 libyaml-cpp0.5v5 mongo-tools
-  mongodb mongodb-clients mongodb-server mongodb-server-core
-0 upgraded, 14 newly installed, 0 to remove and 0 not upgraded.
-Need to get 53.5 MB of archives.
-After this operation, 217 MB of additional disk space will be used.
-Do you want to continue? [Y/n]
-Get:1 http://archive.ubuntu.com/ubuntu bionic/main amd64 libboost-system1.65.1 amd64 1.65.1+dfsg-0ubuntu5 [10.5 kB]
-Get:2 http://archive.ubuntu.com/ubuntu bionic/main amd64 libboost-filesystem1.65.1 amd64 1.65.1+dfsg-0ubuntu5 [40.3 kB]
-<snip>
-----
+Microsoft has documentation for installing MongoDB in WSL.
+https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-database#install-mongodb[You can find it here.]
+It should work if you're running the latest LTS Ubuntu on WSL.
+It's easiest to start the daemon manually each time (step 9) and then use the mongo shell in another tab.
 
 === MacOS
 
@@ -45,13 +26,10 @@ https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/[Instructions c
 
 == Testing our installation
 
-Now we should be able to start the service (if it isn't running already) and
-connect via the mongo shell:
+Now we should be able to start connect via the mongo shell:
 
 [source, console]
 ----
-ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo service mongodb start
- * Starting database mongodb                                                                                                                                                                              [ OK ]
 ryan@R90VJ3MK:~/IT635/docs/exercises$ mongo
 MongoDB shell version v3.6.3
 connecting to: mongodb://127.0.0.1:27017

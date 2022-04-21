@@ -49,3 +49,15 @@ image::rep3.svg[]
 == Failover
 
 image::rep4.svg[]
+
+[.columns]
+== Sharding
+
+[.col]
+image::shard.avif[]
+
+[.col]
+* Clusters can shard data across nodes
+* This allows for _large_ datasets
+* Shards can be part of a replica set
+* A sharded cluster combines both replica set and cluster

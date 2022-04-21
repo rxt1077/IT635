@@ -2,18 +2,19 @@
 
 In this exercise we will be analyzing a script that cleans data for entry into the DB.
 
-== Running the import.py script
+== Testing the import.py script
 
-`import.py` can be found 
-[source, text]
-----
-----
+`import.py` can be found in the `example-project/original_data` directory in the https://github.com/rxt1077/IT635/blob/master/example-project/original_data/import.py[class git repo].
+Take a look at the `requirements.txt` file and see if you can install the needed libraries (remember Exercise 3).
+https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/[Set up and run the script], then answer the questions below.
 
 == Questions
 
 Answer these questions in the text box provided for the assignment
 
 [qanda]
+How many rows will this script check?::
+  {empty}
 How are orders separated in our source data?::
   {empty}
 Describe how you would iterate through the orders.::

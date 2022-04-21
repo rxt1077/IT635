@@ -660,163 +660,245 @@ pre.rouge {
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this exercise we will be:</p>
+<p>In this exercise, we will be:</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+<div class="ulist">
+<ul>
 <li>
-<p>Creating a new DB for our DVD rental information</p>
+<p>Installing MongoDB</p>
 </li>
 <li>
-<p>Exporting our old DB to BSON</p>
+<p>Testing the installation</p>
 </li>
 <li>
-<p>Importing that BSON into the new DB</p>
+<p>Downloading the Sakila DVD rental database in JSON format for import into
+MongoDB</p>
 </li>
 <li>
-<p>Deleting the collections in the old DB</p>
+<p>Performing our first query with MongoDB</p>
 </li>
-</ol>
+<li>
+<p>Answering a few questions</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_exporting">Exporting</h2>
+<h2 id="_installing_mongodb">Installing MongoDB</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_wsl2_on_windows">WSL2 on Windows</h3>
+<div class="paragraph">
+<p>Microsoft has documentation for installing MongoDB in WSL.
+<a href="https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-database#install-mongodb">You can find it here.</a>
+It should work if you&#8217;re running the latest LTS Ubuntu on WSL.
+It&#8217;s easiest to start the daemon manually each time (step 9) and then use the mongo shell in another tab.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_macos">MacOS</h3>
+<div class="paragraph">
+<p>The recommended procedure for MacOS is to install via the Homebrew package
+manager (which is a great tool to get familiar with BTW).
+<a href="https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/">Instructions can be found here.</a></p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_testing_our_installation">Testing our installation</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When we imported our movie rental data, it automatically went into the default
-<code>test</code> database. Let&#8217;s export that data from the system shell (not mongo shell)
-to BSON now:</p>
+<p>Now we should be able to start connect via the mongo shell:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>mongodump <span class="nt">--archive</span><span class="o">=</span><span class="s2">"test.bson"</span> <span class="nt">--db</span><span class="o">=</span><span class="s2">"test"</span> <i class="conum" data-value="1"></i><b>(1)</b>
-<span class="go">2021-03-26T12:51:13.720-0400    writing test.films to archive 'test.bson'
-2021-03-26T12:51:13.720-0400    writing test.customers to archive 'test.bson'
-2021-03-26T12:51:13.720-0400    writing test.stores to archive 'test.bson'
-2021-03-26T12:51:13.724-0400    done dumping test.stores (2 documents)
-2021-03-26T12:51:13.730-0400    done dumping test.films (1000 documents)
-2021-03-26T12:51:13.738-0400    done dumping test.customers (599 documents)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span>mongo
+<span class="go">MongoDB shell version v3.6.3
+connecting to: mongodb://127.0.0.1:27017
+MongoDB server version: 3.6.3
+Welcome to the MongoDB shell.
+For interactive help, type "help".
+For more comprehensive documentation, see
+        http://docs.mongodb.org/
+Questions? Try the support group
+        http://groups.google.com/group/mongodb-user
+Server has startup warnings:
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten]
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+</span><span class="gp">&gt;</span><span class="w"> </span><span class="nb">help</span>
+<span class="go">        db.help()                    help on db methods
+        db.mycoll.help()             help on collection methods
+        sh.help()                    sharding helpers
+        rs.help()                    replica set helpers
+        help admin                   administrative help
+        help connect                 connecting to a db help
+        help keys                    key shortcuts
+        help misc                    misc things to know
+        help mr                      mapreduce
+
+        show dbs                     show database names
+        show collections             show collections in current database
+        show users                   show users in current database
+</span><span class="gp">        show profile                 show most recent system.profile entries with time &gt;</span><span class="o">=</span> 1ms
+<span class="go">        show logs                    show the accessible logger names
+        show log [name]              prints out the last segment of log in memory, 'global' is default
+</span><span class="gp">        use &lt;db_name&gt;</span><span class="w">                </span><span class="nb">set </span>current database
+<span class="go">        db.foo.find()                list objects in collection foo
+        db.foo.find( { a : 1 } )     list objects in foo where a == 1
+</span><span class="gp">        it                           result of the last line evaluated;</span><span class="w"> </span>use to further iterate
+<span class="go">        DBQuery.shellBatchSize = x   set default number of items to display on shell
+        exit                         quit the mongo shell
+</span><span class="gp">&gt;</span><span class="w"> </span>show dbs
+<span class="go">admin  0.000GB
+local  0.000GB
+</span><span class="gp">&gt;</span><span class="w"> </span><span class="nb">exit</span>
+<span class="go">bye</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_downloading_and_loading_the_sample_db">Downloading and loading the Sample DB</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We will be using the Sakila database, converted to JSON as found
+<a href="http://guyharrison.squarespace.com/storage/sakila.tgz">here</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span>wget http://guyharrison.squarespace.com/storage/sakila.tgz
+<span class="go">Will not apply HSTS. The HSTS database must be a regular and non-world-writable file.
+ERROR: could not open HSTS store at '/home/ryan/.wget-hsts'. HSTS will be disabled.
+--2021-03-12 10:25:58--  http://guyharrison.squarespace.com/storage/sakila.tgz
+Resolving guyharrison.squarespace.com (guyharrison.squarespace.com)... 198.49.23.177, 198.185.159.176, 198.185.159.177, ...
+Connecting to guyharrison.squarespace.com (guyharrison.squarespace.com)|198.49.23.177|:80... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: http://static1.1.sqspcdn.com/static/f/359481/26067410/1427081957890/sakila.tgz?token=MShSPWx2I2A1Akf5wBdwgBMD%2FbA%3D [following]
+--2021-03-12 10:25:58--  http://static1.1.sqspcdn.com/static/f/359481/26067410/1427081957890/sakila.tgz?token=MShSPWx2I2A1Akf5wBdwgBMD%2FbA%3D
+Resolving static1.1.sqspcdn.com (static1.1.sqspcdn.com)... 151.101.0.238, 151.101.64.238, 151.101.128.238, ...
+Connecting to static1.1.sqspcdn.com (static1.1.sqspcdn.com)|151.101.0.238|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 780149 (762K) [application/octet-stream]
+Saving to: ‘sakila.tgz’
+
+</span><span class="gp">sakila.tgz                                           100%[===================================================================================================================&gt;</span><span class="o">]</span> 761.86K  <span class="nt">--</span>.-KB/s    <span class="k">in </span>0.1s
+<span class="go">
+2021-03-12 10:25:59 (7.56 MB/s) - ‘sakila.tgz’ saved [780149/780149]
+
+</span><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">tar </span>zxvf sakila.tgz <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="go">customers.json
+films.json
+stores.json
+</span><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">sudo </span>mongoimport customers.json <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="go">2021-03-12T10:26:53.110-0500    no collection specified
+2021-03-12T10:26:53.110-0500    using filename 'customers' as collection
+2021-03-12T10:26:53.126-0500    connected to: localhost
+2021-03-12T10:26:53.278-0500    imported 599 documents
+</span><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">sudo </span>mongoimport films.json
+<span class="go">2021-03-12T10:26:59.242-0500    no collection specified
+2021-03-12T10:26:59.242-0500    using filename 'films' as collection
+2021-03-12T10:26:59.243-0500    connected to: localhost
+2021-03-12T10:26:59.296-0500    imported 1000 documents
+</span><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">sudo </span>mongoimport stores.json
+<span class="go">2021-03-12T10:27:03.567-0500    no collection specified
+2021-03-12T10:27:03.567-0500    using filename 'stores' as collection
+2021-03-12T10:27:03.569-0500    connected to: localhost
+2021-03-12T10:27:03.613-0500    imported 2 documents</span></code></pre>
 </div>
 </div>
 <div class="colist arabic">
 <table>
 <tr>
 <td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>notice I&#8217;m in the tmp directory to make sure there are no permission issues</td>
+<td>Don&#8217;t forget to uncompress the archive</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Note that this must be run as root</td>
 </tr>
 </table>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_importing">Importing</h2>
+<h2 id="_performing_a_query">Performing a query</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Now let&#8217;s import that BSON data into a <em>new</em> DB named <code>movies</code>. This DB will be
-created automatically. The <code>nsFrom</code> and <code>nsTo</code> commands are used to rewrite a
-namespace, which in our case is changing the DB from <code>test</code> to <code>movies</code>:</p>
+<p>Now let&#8217;s connect to the MongoDB, use the test DB, find the object in the <code>film</code>
+collection named <code>ALI FOREVER</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>mongorestore <span class="nt">--archive</span><span class="o">=</span><span class="s2">"test.bson"</span> <span class="nt">--nsFrom</span><span class="o">=</span><span class="s1">'test.*'</span> <span class="nt">--nsTo</span><span class="o">=</span><span class="s1">'movies.*'</span>
-<span class="go">2021-03-26T12:54:57.739-0400    preparing collections to restore from
-2021-03-26T12:54:57.760-0400    reading metadata for movies.stores from archive 'test.bson'
-2021-03-26T12:54:57.780-0400    restoring movies.stores from archive 'test.bson'
-2021-03-26T12:54:57.790-0400    no indexes to restore
-2021-03-26T12:54:57.791-0400    finished restoring movies.stores (2 documents)
-2021-03-26T12:54:57.793-0400    reading metadata for movies.films from archive 'test.bson'
-2021-03-26T12:54:57.815-0400    restoring movies.films from archive 'test.bson'
-2021-03-26T12:54:57.829-0400    reading metadata for movies.customers from archive 'test.bson'
-2021-03-26T12:54:57.849-0400    restoring movies.customers from archive 'test.bson'
-2021-03-26T12:54:57.853-0400    no indexes to restore
-2021-03-26T12:54:57.853-0400    finished restoring movies.films (1000 documents)
-2021-03-26T12:54:57.885-0400    no indexes to restore
-2021-03-26T12:54:57.885-0400    finished restoring movies.customers (599 documents)
-2021-03-26T12:54:57.885-0400    done</span></code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_deleting_the_old_collections">Deleting the Old Collections</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Now that we have everything in our new <code>movies</code> DB we will delete the
-collections we added to the <code>test</code> DB last week. It is pretty standard to have
-a <code>test</code> DB so we will keep the DB and just remove the collections:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:/tmp$</span><span class="w"> </span>mongo <i class="conum" data-value="1"></i><b>(1)</b>
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span>mongo
 <span class="go">MongoDB shell version v3.6.3
 connecting to: mongodb://127.0.0.1:27017
 MongoDB server version: 3.6.3
 Server has startup warnings:
-2021-03-26T12:24:20.538-0400 I STORAGE  [initandlisten]
-2021-03-26T12:24:20.538-0400 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
-2021-03-26T12:24:20.538-0400 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
-2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
-2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
-2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
-2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
-2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
-2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
-2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
-2021-03-26T12:24:21.264-0400 I CONTROL  [initandlisten]
-</span><span class="gp">&gt;</span><span class="w"> </span>show dbs
-<span class="go">admin   0.000GB
-config  0.000GB
-local   0.000GB
-movies  0.002GB
-test    0.002GB
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten]
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
+2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
+2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
 </span><span class="gp">&gt;</span><span class="w"> </span>use <span class="nb">test</span>
 <span class="go">switched to db test
 </span><span class="gp">&gt;</span><span class="w"> </span>show collections
 <span class="go">customers
 films
 stores
-</span><span class="gp">&gt;</span><span class="w"> </span>db.customers.remove<span class="o">({})</span> <i class="conum" data-value="2"></i><b>(2)</b>
-<span class="go">WriteResult({ "nRemoved" : 599 })
-</span><span class="gp">&gt;</span><span class="w"> </span>db.films.remove<span class="o">({})</span>
-<span class="go">WriteResult({ "nRemoved" : 1000 })
-</span><span class="gp">&gt;</span><span class="w"> </span>db.stores.remove<span class="o">({})</span>
-<span class="go">WriteResult({ "nRemoved" : 2 })
-</span><span class="gp">&gt;</span><span class="w"> </span>quit<span class="o">()</span></code></pre>
+</span><span class="gp">&gt;</span><span class="w"> </span>db.films.find<span class="o">(</span> <span class="o">{</span> Title: <span class="s2">"ALI FOREVER"</span> <span class="o">}</span> <span class="o">)</span>
+<span class="go">{ "_id" : 13, "Actors" : [ { "First name" : "CARY", "Last name" : "MCCONAUGHEY", "actorId" : 77 }, { "First name" : "CHRISTOPHER", "Last name" : "BERRY", "actorId" : 91 }, { "First name" : "KENNETH", "Last nam
+e" : "TORN", "actorId" : 94 }, { "First name" : "MORGAN", "Last name" : "MCDORMAND", "actorId" : 114 }, { "First name" : "JON", "Last name" : "CHASE", "actorId" : 176 } ], "Category" : "Horror", "Description"
+: "A Action-Packed Drama of a Dentist And a Crocodile who must Battle a Feminist in The Canadian Rockies", "Length" : "150", "Rating" : "PG", "Rental Duration" : "4", "Replacement Cost" : "21.99", "Special Fea
+tures" : "Deleted Scenes,Behind the Scenes", "Title" : "ALI FOREVER" }
+</span><span class="gp">&gt;</span><span class="w"> </span><span class="nb">exit</span>
+<span class="go">bye</span></code></pre>
 </div>
 </div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Notice how we are working <em>within</em> the mongo shell here</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Remove takes a query document as a parameter, specify what kinds of
-documents to remove. The empty document, <code>{}</code>, removes all documents in
-the collection.</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>MongoDB queries consist of multiple documents (parameters) passed as JSON. The
+first document (the only one we are using today) is called the
+<a href="https://docs.mongodb.com/manual/core/document/#document-query-filter">query
+filter document</a>. Ours is <code>{ Title: "ALI FOREVER" }</code> meaning we want to
+documents that match the title <code>ALI FOREVER</code>. You can learn more about
+<a href="https://docs.mongodb.com/manual/tutorial/query-documents/">MongoDB queries here</a>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_questions">Questions</h2>
 <div class="sectionbody">
-<div class="qlist qanda">
-<ol>
+<div class="paragraph">
+<p>Please use the text box for this assignment to answer the following questions:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
 <li>
-<p><em>Now that you have used it for some basic administrative tasks, what differences do you notice between MongoDB and PostgreSQL?</em></p>
-<p></p>
+<p>Why might JSON be easier for developers to use than SQL?</p>
 </li>
 <li>
-<p><em>What is the <em>basic</em> difference between BSON and JSON?</em></p>
-<p></p>
+<p>Why does the film we queried have an <code>_id</code> attribute even though it wasn&#8217;t in
+the original data?</p>
 </li>
 <li>
-<p><em>If a DB in PostgreSQL is equivalent to a DB in MongoDB, what are tables and rows from PostgreSQL equivalent to in MongoDB?</em></p>
-<p></p>
+<p>Based on today&#8217;s query, collections in MongoDB seem analogous to what in
+PostgreSQL?</p>
 </li>
 </ol>
 </div>
@@ -825,7 +907,7 @@ the collection.</td>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-03-26 17:08:14 UTC
+Last updated 2022-03-25 00:27:33 UTC
 </div>
 </div>
 </body>

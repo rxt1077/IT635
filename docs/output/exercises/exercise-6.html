@@ -436,221 +436,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-pre.rouge table td { padding: 5px; }
-pre.rouge table pre { margin: 0; }
-pre.rouge .cm {
-  color: #999988;
-  font-style: italic;
-}
-pre.rouge .cp {
-  color: #999999;
-  font-weight: bold;
-}
-pre.rouge .c1 {
-  color: #999988;
-  font-style: italic;
-}
-pre.rouge .cs {
-  color: #999999;
-  font-weight: bold;
-  font-style: italic;
-}
-pre.rouge .c, pre.rouge .ch, pre.rouge .cd, pre.rouge .cpf {
-  color: #999988;
-  font-style: italic;
-}
-pre.rouge .err {
-  color: #a61717;
-  background-color: #e3d2d2;
-}
-pre.rouge .gd {
-  color: #000000;
-  background-color: #ffdddd;
-}
-pre.rouge .ge {
-  color: #000000;
-  font-style: italic;
-}
-pre.rouge .gr {
-  color: #aa0000;
-}
-pre.rouge .gh {
-  color: #999999;
-}
-pre.rouge .gi {
-  color: #000000;
-  background-color: #ddffdd;
-}
-pre.rouge .go {
-  color: #888888;
-}
-pre.rouge .gp {
-  color: #555555;
-}
-pre.rouge .gs {
-  font-weight: bold;
-}
-pre.rouge .gu {
-  color: #aaaaaa;
-}
-pre.rouge .gt {
-  color: #aa0000;
-}
-pre.rouge .kc {
-  color: #000000;
-  font-weight: bold;
-}
-pre.rouge .kd {
-  color: #000000;
-  font-weight: bold;
-}
-pre.rouge .kn {
-  color: #000000;
-  font-weight: bold;
-}
-pre.rouge .kp {
-  color: #000000;
-  font-weight: bold;
-}
-pre.rouge .kr {
-  color: #000000;
-  font-weight: bold;
-}
-pre.rouge .kt {
-  color: #445588;
-  font-weight: bold;
-}
-pre.rouge .k, pre.rouge .kv {
-  color: #000000;
-  font-weight: bold;
-}
-pre.rouge .mf {
-  color: #009999;
-}
-pre.rouge .mh {
-  color: #009999;
-}
-pre.rouge .il {
-  color: #009999;
-}
-pre.rouge .mi {
-  color: #009999;
-}
-pre.rouge .mo {
-  color: #009999;
-}
-pre.rouge .m, pre.rouge .mb, pre.rouge .mx {
-  color: #009999;
-}
-pre.rouge .sa {
-  color: #000000;
-  font-weight: bold;
-}
-pre.rouge .sb {
-  color: #d14;
-}
-pre.rouge .sc {
-  color: #d14;
-}
-pre.rouge .sd {
-  color: #d14;
-}
-pre.rouge .s2 {
-  color: #d14;
-}
-pre.rouge .se {
-  color: #d14;
-}
-pre.rouge .sh {
-  color: #d14;
-}
-pre.rouge .si {
-  color: #d14;
-}
-pre.rouge .sx {
-  color: #d14;
-}
-pre.rouge .sr {
-  color: #009926;
-}
-pre.rouge .s1 {
-  color: #d14;
-}
-pre.rouge .ss {
-  color: #990073;
-}
-pre.rouge .s, pre.rouge .dl {
-  color: #d14;
-}
-pre.rouge .na {
-  color: #008080;
-}
-pre.rouge .bp {
-  color: #999999;
-}
-pre.rouge .nb {
-  color: #0086B3;
-}
-pre.rouge .nc {
-  color: #445588;
-  font-weight: bold;
-}
-pre.rouge .no {
-  color: #008080;
-}
-pre.rouge .nd {
-  color: #3c5d5d;
-  font-weight: bold;
-}
-pre.rouge .ni {
-  color: #800080;
-}
-pre.rouge .ne {
-  color: #990000;
-  font-weight: bold;
-}
-pre.rouge .nf, pre.rouge .fm {
-  color: #990000;
-  font-weight: bold;
-}
-pre.rouge .nl {
-  color: #990000;
-  font-weight: bold;
-}
-pre.rouge .nn {
-  color: #555555;
-}
-pre.rouge .nt {
-  color: #000080;
-}
-pre.rouge .vc {
-  color: #008080;
-}
-pre.rouge .vg {
-  color: #008080;
-}
-pre.rouge .vi {
-  color: #008080;
-}
-pre.rouge .nv, pre.rouge .vm {
-  color: #008080;
-}
-pre.rouge .ow {
-  color: #000000;
-  font-weight: bold;
-}
-pre.rouge .o {
-  color: #000000;
-  font-weight: bold;
-}
-pre.rouge .w {
-  color: #bbbbbb;
-}
-pre.rouge {
-  background-color: #f8f8f8;
-}
-</style>
 </head>
 <body class="article">
 <div id="header">
@@ -660,246 +445,17 @@ pre.rouge {
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this exercise, we will be:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Installing MongoDB</p>
-</li>
-<li>
-<p>Testing the installation</p>
-</li>
-<li>
-<p>Downloading the Sakila DVD rental database in JSON format for import into
-MongoDB</p>
-</li>
-<li>
-<p>Performing our first query with MongoDB</p>
-</li>
-<li>
-<p>Answering a few questions</p>
-</li>
-</ul>
+<p>In this exercise we will be analyzing a script that cleans data for entry into the DB.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_installing_mongodb">Installing MongoDB</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_wsl2_on_windows">WSL2 on Windows</h3>
-<div class="paragraph">
-<p>We can use the <code>apt-get install</code> command to install the community edition of MongoDB:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">sudo </span>apt-get <span class="nb">install </span>mongodb
-<span class="go">[sudo] password for ryan:
-Reading package lists... Done
-Building dependency tree
-Reading state information... Done
-The following additional packages will be installed:
-  libboost-filesystem1.65.1 libboost-iostreams1.65.1 libboost-program-options1.65.1 libboost-system1.65.1 libgoogle-perftools4 libsnappy1v5 libstemmer0d libtcmalloc-minimal4 libyaml-cpp0.5v5 mongo-tools
-  mongodb-clients mongodb-server mongodb-server-core
-The following NEW packages will be installed:
-  libboost-filesystem1.65.1 libboost-iostreams1.65.1 libboost-program-options1.65.1 libboost-system1.65.1 libgoogle-perftools4 libsnappy1v5 libstemmer0d libtcmalloc-minimal4 libyaml-cpp0.5v5 mongo-tools
-  mongodb mongodb-clients mongodb-server mongodb-server-core
-0 upgraded, 14 newly installed, 0 to remove and 0 not upgraded.
-Need to get 53.5 MB of archives.
-After this operation, 217 MB of additional disk space will be used.
-Do you want to continue? [Y/n]
-Get:1 http://archive.ubuntu.com/ubuntu bionic/main amd64 libboost-system1.65.1 amd64 1.65.1+dfsg-0ubuntu5 [10.5 kB]
-Get:2 http://archive.ubuntu.com/ubuntu bionic/main amd64 libboost-filesystem1.65.1 amd64 1.65.1+dfsg-0ubuntu5 [40.3 kB]
-</span><span class="gp">&lt;snip&gt;</span></code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_macos">MacOS</h3>
-<div class="paragraph">
-<p>The recommended procedure for MacOS is to install via the Homebrew package
-manager (which is a great tool to get familiar with BTW).
-<a href="https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/">Instructions can be found here.</a></p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_testing_our_installation">Testing our installation</h2>
+<h2 id="_testing_the_import_py_script">Testing the import.py script</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Now we should be able to start the service (if it isn&#8217;t running already) and
-connect via the mongo shell:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">sudo </span>service mongodb start
-<span class="go"> * Starting database mongodb                                                                                                                                                                              [ OK ]
-</span><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span>mongo
-<span class="go">MongoDB shell version v3.6.3
-connecting to: mongodb://127.0.0.1:27017
-MongoDB server version: 3.6.3
-Welcome to the MongoDB shell.
-For interactive help, type "help".
-For more comprehensive documentation, see
-        http://docs.mongodb.org/
-Questions? Try the support group
-        http://groups.google.com/group/mongodb-user
-Server has startup warnings:
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten]
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-</span><span class="gp">&gt;</span><span class="w"> </span><span class="nb">help</span>
-<span class="go">        db.help()                    help on db methods
-        db.mycoll.help()             help on collection methods
-        sh.help()                    sharding helpers
-        rs.help()                    replica set helpers
-        help admin                   administrative help
-        help connect                 connecting to a db help
-        help keys                    key shortcuts
-        help misc                    misc things to know
-        help mr                      mapreduce
-
-        show dbs                     show database names
-        show collections             show collections in current database
-        show users                   show users in current database
-</span><span class="gp">        show profile                 show most recent system.profile entries with time &gt;</span><span class="o">=</span> 1ms
-<span class="go">        show logs                    show the accessible logger names
-        show log [name]              prints out the last segment of log in memory, 'global' is default
-</span><span class="gp">        use &lt;db_name&gt;</span><span class="w">                </span><span class="nb">set </span>current database
-<span class="go">        db.foo.find()                list objects in collection foo
-        db.foo.find( { a : 1 } )     list objects in foo where a == 1
-</span><span class="gp">        it                           result of the last line evaluated;</span><span class="w"> </span>use to further iterate
-<span class="go">        DBQuery.shellBatchSize = x   set default number of items to display on shell
-        exit                         quit the mongo shell
-</span><span class="gp">&gt;</span><span class="w"> </span>show dbs
-<span class="go">admin  0.000GB
-local  0.000GB
-</span><span class="gp">&gt;</span><span class="w"> </span><span class="nb">exit</span>
-<span class="go">bye</span></code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_downloading_and_loading_the_sample_db">Downloading and loading the Sample DB</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>We will be using the Sakila database, converted to JSON as found
-<a href="http://guyharrison.squarespace.com/storage/sakila.tgz">here</a>.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span>wget http://guyharrison.squarespace.com/storage/sakila.tgz
-<span class="go">Will not apply HSTS. The HSTS database must be a regular and non-world-writable file.
-ERROR: could not open HSTS store at '/home/ryan/.wget-hsts'. HSTS will be disabled.
---2021-03-12 10:25:58--  http://guyharrison.squarespace.com/storage/sakila.tgz
-Resolving guyharrison.squarespace.com (guyharrison.squarespace.com)... 198.49.23.177, 198.185.159.176, 198.185.159.177, ...
-Connecting to guyharrison.squarespace.com (guyharrison.squarespace.com)|198.49.23.177|:80... connected.
-HTTP request sent, awaiting response... 302 Found
-Location: http://static1.1.sqspcdn.com/static/f/359481/26067410/1427081957890/sakila.tgz?token=MShSPWx2I2A1Akf5wBdwgBMD%2FbA%3D [following]
---2021-03-12 10:25:58--  http://static1.1.sqspcdn.com/static/f/359481/26067410/1427081957890/sakila.tgz?token=MShSPWx2I2A1Akf5wBdwgBMD%2FbA%3D
-Resolving static1.1.sqspcdn.com (static1.1.sqspcdn.com)... 151.101.0.238, 151.101.64.238, 151.101.128.238, ...
-Connecting to static1.1.sqspcdn.com (static1.1.sqspcdn.com)|151.101.0.238|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 780149 (762K) [application/octet-stream]
-Saving to: ‘sakila.tgz’
-
-</span><span class="gp">sakila.tgz                                           100%[===================================================================================================================&gt;</span><span class="o">]</span> 761.86K  <span class="nt">--</span>.-KB/s    <span class="k">in </span>0.1s
-<span class="go">
-2021-03-12 10:25:59 (7.56 MB/s) - ‘sakila.tgz’ saved [780149/780149]
-
-</span><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">tar </span>zxvf sakila.tgz <i class="conum" data-value="1"></i><b>(1)</b>
-<span class="go">customers.json
-films.json
-stores.json
-</span><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">sudo </span>mongoimport customers.json <i class="conum" data-value="2"></i><b>(2)</b>
-<span class="go">2021-03-12T10:26:53.110-0500    no collection specified
-2021-03-12T10:26:53.110-0500    using filename 'customers' as collection
-2021-03-12T10:26:53.126-0500    connected to: localhost
-2021-03-12T10:26:53.278-0500    imported 599 documents
-</span><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">sudo </span>mongoimport films.json
-<span class="go">2021-03-12T10:26:59.242-0500    no collection specified
-2021-03-12T10:26:59.242-0500    using filename 'films' as collection
-2021-03-12T10:26:59.243-0500    connected to: localhost
-2021-03-12T10:26:59.296-0500    imported 1000 documents
-</span><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span><span class="nb">sudo </span>mongoimport stores.json
-<span class="go">2021-03-12T10:27:03.567-0500    no collection specified
-2021-03-12T10:27:03.567-0500    using filename 'stores' as collection
-2021-03-12T10:27:03.569-0500    connected to: localhost
-2021-03-12T10:27:03.613-0500    imported 2 documents</span></code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Don&#8217;t forget to uncompress the archive</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Note that this must be run as root</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_performing_a_query">Performing a query</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Now let&#8217;s connect to the MongoDB, use the test DB, find the object in the <code>film</code>
-collection named <code>ALI FOREVER</code>:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~/IT635/docs/exercises$</span><span class="w"> </span>mongo
-<span class="go">MongoDB shell version v3.6.3
-connecting to: mongodb://127.0.0.1:27017
-MongoDB server version: 3.6.3
-Server has startup warnings:
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten]
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-</span><span class="gp">&gt;</span><span class="w"> </span>use <span class="nb">test</span>
-<span class="go">switched to db test
-</span><span class="gp">&gt;</span><span class="w"> </span>show collections
-<span class="go">customers
-films
-stores
-</span><span class="gp">&gt;</span><span class="w"> </span>db.films.find<span class="o">(</span> <span class="o">{</span> Title: <span class="s2">"ALI FOREVER"</span> <span class="o">}</span> <span class="o">)</span>
-<span class="go">{ "_id" : 13, "Actors" : [ { "First name" : "CARY", "Last name" : "MCCONAUGHEY", "actorId" : 77 }, { "First name" : "CHRISTOPHER", "Last name" : "BERRY", "actorId" : 91 }, { "First name" : "KENNETH", "Last nam
-e" : "TORN", "actorId" : 94 }, { "First name" : "MORGAN", "Last name" : "MCDORMAND", "actorId" : 114 }, { "First name" : "JON", "Last name" : "CHASE", "actorId" : 176 } ], "Category" : "Horror", "Description"
-: "A Action-Packed Drama of a Dentist And a Crocodile who must Battle a Feminist in The Canadian Rockies", "Length" : "150", "Rating" : "PG", "Rental Duration" : "4", "Replacement Cost" : "21.99", "Special Fea
-tures" : "Deleted Scenes,Behind the Scenes", "Title" : "ALI FOREVER" }
-</span><span class="gp">&gt;</span><span class="w"> </span><span class="nb">exit</span>
-<span class="go">bye</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>MongoDB queries consist of multiple documents (parameters) passed as JSON. The
-first document (the only one we are using today) is called the
-<a href="https://docs.mongodb.com/manual/core/document/#document-query-filter">query
-filter document</a>. Ours is <code>{ Title: "ALI FOREVER" }</code> meaning we want to
-documents that match the title <code>ALI FOREVER</code>. You can learn more about
-<a href="https://docs.mongodb.com/manual/tutorial/query-documents/">MongoDB queries here</a>.</p>
+<p><code>import.py</code> can be found in the <code>example-project/original_data</code> directory in the <a href="https://github.com/rxt1077/IT635/blob/master/example-project/original_data/import.py">class git repo</a>.
+Take a look at the <code>requirements.txt</code> file and see if you can install the needed libraries (remember Exercise 3).
+<a href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/">Set up and run the script</a>, then answer the questions below.</p>
 </div>
 </div>
 </div>
@@ -907,20 +463,41 @@ documents that match the title <code>ALI FOREVER</code>. You can learn more abou
 <h2 id="_questions">Questions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Please use the text box for this assignment to answer the following questions:</p>
+<p>Answer these questions in the text box provided for the assignment</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+<div class="qlist qanda">
+<ol>
 <li>
-<p>Why might JSON be easier for developers to use than SQL?</p>
+<p><em>How many rows will this script check?</em></p>
+<p></p>
 </li>
 <li>
-<p>Why does the film we queried have an <code>_id</code> attribute even though it wasn&#8217;t in
-the original data?</p>
+<p><em>How are orders separated in our source data?</em></p>
+<p></p>
 </li>
 <li>
-<p>Based on today&#8217;s query, collections in MongoDB seem analogous to what in
-PostgreSQL?</p>
+<p><em>Describe how you would iterate through the orders.</em></p>
+<p></p>
+</li>
+<li>
+<p><em>Can you think of an order situation that would prevent customers from being correctly detected?</em></p>
+<p></p>
+</li>
+<li>
+<p><em>How would you change the <code>import.py</code> script to fix this?</em></p>
+<p></p>
+</li>
+<li>
+<p><em>What are regular expressions used for in <code>import.py</code>? Does it work? When wouldn&#8217;t it work?</em></p>
+<p></p>
+</li>
+<li>
+<p><em>What data is missing from the excel file that is used in the database?</em></p>
+<p></p>
+</li>
+<li>
+<p><em>Once <code>orders</code>, <code>parts</code>, and <code>customers</code> are pulled from the excel file, what would the last step be?</em></p>
+<p></p>
 </li>
 </ol>
 </div>
@@ -929,7 +506,7 @@ PostgreSQL?</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-03-12 15:48:06 UTC
+Last updated 2022-02-24 22:39:28 UTC
 </div>
 </div>
 </body>
