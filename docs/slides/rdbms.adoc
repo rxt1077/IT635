@@ -72,6 +72,43 @@ image::integrity.png[]
 * 1:1 - One to one (May share a PK)
 * N:M - Many to many (use another table to map it)
 
+=== N:M Mapping Table Example
+
+[.shrink-shrink]
+--
+
+.Car Table
+[cols="1,1"]
+|===
+|CAR_ID|NAME
+
+|1|Pinto
+|2|Accord
+|===
+
+.Part Table
+[cols="1,1"]
+|===
+|PART_ID|NAME
+
+|1|Exploding Gas Tank
+|2|Regular Gas Tank
+|3|Alternator
+|===
+
+.Linking Table
+[cols="1,1"]
+|===
+|CAR_ID|PART_ID
+
+|1|1
+|1|3
+|2|2
+|2|3
+|===
+
+--
+
 == Indexes
 
 * Solves the problem of looking things up faster

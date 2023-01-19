@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="generator" content="Asciidoctor 2.0.18">
 <title>Exercise 1</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -84,10 +84,10 @@ code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;
 ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
 ul,ol{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -678,6 +678,9 @@ pre.rouge {
 </li>
 </ol>
 </div>
+<div class="paragraph">
+<p>All code blocks will be demonstrating the commands from WSL2 in Windows.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -715,11 +718,10 @@ directly on MacOS:</p>
 <div class="sect2">
 <h3 id="_macos">MacOS</h3>
 <div class="paragraph">
-<p>Macs run BSD which is close enough to Linux for our purposes.  Follow
-<a href="https://www.postgresql.org/download/macosx/">the directions from the PostgreSQL
-website</a> to install PostgreSQL natively on a Mac. You will need to be able to
-run the <code>psql</code> command line client from Terminal and connect to your running
-server.</p>
+<p>Macs run BSD which is close enough to Linux for our purposes.
+Follow <a href="https://www.postgresql.org/download/macosx/">the directions from the PostgreSQL website</a> to install PostgreSQL natively on a Mac.
+I personally Posgres.app to be the easiest.
+You will need to be able to run the <code>psql</code> command line client from Terminal and connect to your running server.</p>
 </div>
 </div>
 </div>
@@ -767,6 +769,9 @@ Saving to: ‘pagila-insert-data.sql’
 <pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~$</span><span class="w"> </span><span class="nb">sudo</span> <span class="nt">-u</span> postgres psql &lt; pagila-insert-data.sql
 <span class="gp">&lt;snip&gt;</span></code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>This command can take a while (depending on your machine up to 10 minutes) please allow it to complete.</p>
 </div>
 </div>
 </div>
@@ -856,7 +861,7 @@ Getting started with databases on Windows Subsystem for Linux</a></p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-01-29 16:30:29 UTC
+Last updated 2023-01-19 18:38:38 UTC
 </div>
 </div>
 </body>

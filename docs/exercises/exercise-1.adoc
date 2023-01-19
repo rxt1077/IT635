@@ -7,6 +7,8 @@ In this exercise we will be:
 . Importing SQL
 . Performing a query
 
+All code blocks will be demonstrating the commands from WSL2 in Windows. 
+
 == Installing WSL2 with Ubuntu (Windows only)
 
 The vast majority of production database systems are running Linux. To simulate
@@ -33,11 +35,10 @@ ryan@R90VJ3MK:~$ sudo service postgresql start
 
 === MacOS
 
-Macs run BSD which is close enough to Linux for our purposes.  Follow
-https://www.postgresql.org/download/macosx/[the directions from the PostgreSQL
-website] to install PostgreSQL natively on a Mac. You will need to be able to
-run the `psql` command line client from Terminal and connect to your running
-server.
+Macs run BSD which is close enough to Linux for our purposes.
+Follow https://www.postgresql.org/download/macosx/[the directions from the PostgreSQL website] to install PostgreSQL natively on a Mac.
+I personally Posgres.app to be the easiest.
+You will need to be able to run the `psql` command line client from Terminal and connect to your running server.
 
 == Importing SQL
 
@@ -78,6 +79,8 @@ Finally import the SQL dump with a shell redirect:
 ryan@R90VJ3MK:~$ sudo -u postgres psql < pagila-insert-data.sql
 <snip>
 ----
+
+This command can take a while (depending on your machine up to 10 minutes) please allow it to complete.
 
 == Performing a query
 
