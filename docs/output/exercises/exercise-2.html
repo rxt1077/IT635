@@ -860,7 +860,7 @@ perform particular actions on certain tables.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="text">postgres=# CREATE USER movie_manager WITH PASSWORD 'testing';
+<pre class="rouge highlight"><code data-lang="text">postgres=# CREATE USER movie_manager WITH PASSWORD 'testing'; <i class="conum" data-value="1"></i><b>(1)</b>
 CREATE ROLE
 postgres=# GRANT ALL PRIVILEGES ON DATABASE movies TO movie_manager;
 GRANT
@@ -869,6 +869,14 @@ You are now connected to database "movies" as user "postgres".
 movies=# GRANT SELECT, INSERT, UPDATE, DELETE ON rental, film, inventory TO movie_manager;
 GRANT</code></pre>
 </div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><a href="https://www.postgresql.org/docs/current/sql-createuser.html"><code>CREATE USER</code> is actually an alias for <code>CREATE ROLE</code> <em>with</em> LOGIN</a></td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>Now we can test that we can sign in as the manager. Start by exiting psql and
@@ -969,7 +977,7 @@ default <code>postgres</code> user and database for everything?</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-01-19 18:33:10 UTC
+Last updated 2023-01-26 19:12:50 UTC
 </div>
 </div>
 </body>

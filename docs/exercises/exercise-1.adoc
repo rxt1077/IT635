@@ -53,7 +53,24 @@ Type "help" for help.
 postgres=# \q
 ----
 
-Download the pagila sample database:
+Download the pagila schema:
+
+[source, console]
+----
+ryan@PF2RNZ0W:~$ wget https://raw.githubusercontent.com/devrimgunduz/pagila/master/pagila-schema.sql
+--2023-01-19 17:46:53--  https://raw.githubusercontent.com/devrimgunduz/pagila/master/pagila-schema.sql
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 185.199.110.133, 185.199.111.133, 185.199.108.133, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|185.199.110.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 52422 (51K) [text/plain]
+Saving to: ‘pagila-schema.sql.1’
+
+pagila-schema.sql.1                        100%[======================================================================================>]  51.19K  --.-KB/s    in 0.003s
+
+2023-01-19 17:46:53 (16.3 MB/s) - ‘pagila-schema.sql.1’ saved [52422/52422]
+----
+
+Download the pagila data:
 
 [source, console]
 ----
@@ -72,15 +89,17 @@ pagila-insert-data.sql      100%[==========================================>]   
 2021-01-22 10:44:16 (14.8 MB/s) - ‘pagila-insert-data.sql’ saved [5388598/5388598]
 ----
 
-Finally import the SQL dump with a shell redirect:
+Finally import the SQL schema and data with a shell redirect:
 
 [source, console]
 ----
+ryan@R90VJ3MK:~$ sudo -u postgres psql < pagila-schema.sql
+<snip>
 ryan@R90VJ3MK:~$ sudo -u postgres psql < pagila-insert-data.sql
 <snip>
 ----
 
-This command can take a while (depending on your machine up to 10 minutes) please allow it to complete.
+The second command can take a while (depending on your machine up to 10 minutes) please allow it to complete.
 
 == Performing a query
 

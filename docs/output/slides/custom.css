@@ -33,6 +33,10 @@
     margin: 5px;
 }
 
+table.tableblock {
+    margin: 10px;
+}
+
 /* Shrink heading sizes
 .reveal h1 {
     font-size: 3em;

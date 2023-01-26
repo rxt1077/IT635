@@ -742,7 +742,25 @@ Type "help" for help.
 </div>
 </div>
 <div class="paragraph">
-<p>Download the pagila sample database:</p>
+<p>Download the pagila schema:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@PF2RNZ0W:~$</span><span class="w"> </span>wget https://raw.githubusercontent.com/devrimgunduz/pagila/master/pagila-schema.sql
+<span class="go">--2023-01-19 17:46:53--  https://raw.githubusercontent.com/devrimgunduz/pagila/master/pagila-schema.sql
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 185.199.110.133, 185.199.111.133, 185.199.108.133, ...
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|185.199.110.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 52422 (51K) [text/plain]
+Saving to: ‘pagila-schema.sql.1’
+
+</span><span class="gp">pagila-schema.sql.1                        100%[======================================================================================&gt;</span><span class="o">]</span>  51.19K  <span class="nt">--</span>.-KB/s    <span class="k">in </span>0.003s
+<span class="go">
+2023-01-19 17:46:53 (16.3 MB/s) - ‘pagila-schema.sql.1’ saved [52422/52422]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Download the pagila data:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -762,16 +780,18 @@ Saving to: ‘pagila-insert-data.sql’
 </div>
 </div>
 <div class="paragraph">
-<p>Finally import the SQL dump with a shell redirect:</p>
+<p>Finally import the SQL schema and data with a shell redirect:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~$</span><span class="w"> </span><span class="nb">sudo</span> <span class="nt">-u</span> postgres psql &lt; pagila-insert-data.sql
+<pre class="rouge highlight"><code data-lang="console"><span class="gp">ryan@R90VJ3MK:~$</span><span class="w"> </span><span class="nb">sudo</span> <span class="nt">-u</span> postgres psql &lt; pagila-schema.sql
+<span class="gp">&lt;snip&gt;</span><span class="w">
+</span><span class="gp">ryan@R90VJ3MK:~$</span><span class="w"> </span><span class="nb">sudo</span> <span class="nt">-u</span> postgres psql &lt; pagila-insert-data.sql
 <span class="gp">&lt;snip&gt;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This command can take a while (depending on your machine up to 10 minutes) please allow it to complete.</p>
+<p>The second command can take a while (depending on your machine up to 10 minutes) please allow it to complete.</p>
 </div>
 </div>
 </div>
@@ -861,7 +881,7 @@ Getting started with databases on Windows Subsystem for Linux</a></p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-01-19 18:38:38 UTC
+Last updated 2023-01-19 22:48:32 UTC
 </div>
 </div>
 </body>

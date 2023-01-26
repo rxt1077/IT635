@@ -151,8 +151,8 @@ perform particular actions on certain tables.
 
 [source, text]
 ----
-postgres=# CREATE USER movie_manager WITH PASSWORD 'testing';
-CREATE ROLE
+postgres=# CREATE USER movie_manager WITH PASSWORD 'testing'; <1>
+CREATE ROLE 
 postgres=# GRANT ALL PRIVILEGES ON DATABASE movies TO movie_manager;
 GRANT
 postgres=# \c movies
@@ -160,6 +160,7 @@ You are now connected to database "movies" as user "postgres".
 movies=# GRANT SELECT, INSERT, UPDATE, DELETE ON rental, film, inventory TO movie_manager;
 GRANT
 ----
+<1> https://www.postgresql.org/docs/current/sql-createuser.html[`CREATE USER` is actually an alias for `CREATE ROLE` _with_ LOGIN]
 
 Now we can test that we can sign in as the manager. Start by exiting psql and
 the `postgres` user shell so you get back to your default user. Then you should
