@@ -6,6 +6,12 @@ In this exercise we will be
 . Setting up a user to access the database
 . Querying the top rentals
 
+== Getting Started
+
+Make sure the postgres is up and running.
+If you're using WSL this means running the `service start postgresql` command.
+On a Mac using Postrgres.app it means having the app running.
+
 == Creating a Database and Copying Tables
 
 Previously we https://github.com/devrimgunduz/pagila[downloaded the pagila
@@ -77,12 +83,13 @@ postgres=# \dt <2>
  public | inventory        | table | postgres
  public | language         | table | postgres
  public | payment          | table | postgres
- public | payment_p2020_01 | table | postgres
- public | payment_p2020_02 | table | postgres
- public | payment_p2020_03 | table | postgres
- public | payment_p2020_04 | table | postgres
- public | payment_p2020_05 | table | postgres
- public | payment_p2020_06 | table | postgres
+ public | payment_p2022_01 | table | postgres
+ public | payment_p2022_02 | table | postgres
+ public | payment_p2022_03 | table | postgres
+ public | payment_p2022_04 | table | postgres
+ public | payment_p2022_05 | table | postgres
+ public | payment_p2022_06 | table | postgres
+ public | payment_p2022_07 | table | postgres
  public | rental           | table | postgres
  public | staff            | table | postgres
  public | store            | table | postgres
@@ -106,12 +113,13 @@ movies=# \dt <4>
  public | inventory        | table | postgres
  public | language         | table | postgres
  public | payment          | table | postgres
- public | payment_p2020_01 | table | postgres
- public | payment_p2020_02 | table | postgres
- public | payment_p2020_03 | table | postgres
- public | payment_p2020_04 | table | postgres
- public | payment_p2020_05 | table | postgres
- public | payment_p2020_06 | table | postgres
+ public | payment_p2022_01 | table | postgres
+ public | payment_p2022_02 | table | postgres
+ public | payment_p2022_03 | table | postgres
+ public | payment_p2022_04 | table | postgres
+ public | payment_p2022_05 | table | postgres
+ public | payment_p2022_06 | table | postgres
+ public | payment_p2022_07 | table | postgres
  public | rental           | table | postgres
  public | staff            | table | postgres
  public | store            | table | postgres
@@ -120,8 +128,8 @@ movies=# \dt <4>
 movies=# \c postgres <5>
 You are now connected to database "postgres" as user "postgres".
 postgres=# DROP TABLE actor, address, category, city, country, customer, film, film_actor, film_category, inventory, lan
-guage, payment, payment_p2020_01, payment_p2020_02, payment_p2020_03, payment_p2020_04, payment_p2020_05, payment_p2020_
-06, rental, staff, store CASCADE; <6>
+guage, payment, payment_p2022_01, payment_p2022_02, payment_p2022_03, payment_p2022_04, payment_p2022_05, payment_p2022_
+06, payment_p2022_07, rental, staff, store CASCADE; <6>
 NOTICE:  drop cascades to 8 other objects
 DETAIL:  drop cascades to function rewards_report(integer,numeric)
 drop cascades to view sales_by_film_category
@@ -189,12 +197,13 @@ movies=> \dt <2>
  public | inventory        | table | postgres
  public | language         | table | postgres
  public | payment          | table | postgres
- public | payment_p2020_01 | table | postgres
- public | payment_p2020_02 | table | postgres
- public | payment_p2020_03 | table | postgres
- public | payment_p2020_04 | table | postgres
- public | payment_p2020_05 | table | postgres
- public | payment_p2020_06 | table | postgres
+ public | payment_p2022_01 | table | postgres
+ public | payment_p2022_02 | table | postgres
+ public | payment_p2022_03 | table | postgres
+ public | payment_p2022_04 | table | postgres
+ public | payment_p2022_05 | table | postgres
+ public | payment_p2022_06 | table | postgres
+ public | payment_p2022_07 | table | postgres
  public | rental           | table | postgres
  public | staff            | table | postgres
  public | store            | table | postgres
