@@ -2,3 +2,4 @@
 *.log
 mysql-db
 virtual_env
+docs/output/

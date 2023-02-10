@@ -35,7 +35,7 @@
   environment.
 
 [.columns]
-=== The Two Types of Replication
+=== The Two Types of Backups
 
 .Logical
 [.col.shrink]

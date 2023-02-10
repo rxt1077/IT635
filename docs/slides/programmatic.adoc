@@ -21,6 +21,14 @@
 * Python: SQLAlchemy, Django ORM
 * https://www.fullstackpython.com/object-relational-mappers-orms.html[More Info]
 
+== Connection Pooling
+
+* Some libraries open a DB connection for each operation
+* Instead a pool of connections can be kept open for DB operations
+* Balance between too many open connections and the cost of opening/closing connections
+* The "right size" is hard to find
+* https://www.psycopg.org/psycopg3/docs/advanced/pool.html[Psycopg supports dynamic sizing too]
+
 == SQL Injection
 
 * Use a library to sanitize your inputs!
