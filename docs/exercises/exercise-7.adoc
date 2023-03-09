@@ -11,162 +11,144 @@ In this exercise, we will be:
 
 == Installing MongoDB
 
-=== WSL2 on Windows
-
-Microsoft has documentation for installing MongoDB in WSL.
-https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-database#install-mongodb[You can find it here.]
-It should work if you're running the latest LTS Ubuntu on WSL.
-It's easiest to start the daemon manually each time (step 9) and then use the mongo shell in another tab.
-
-=== MacOS
-
-The recommended procedure for MacOS is to install via the Homebrew package
-manager (which is a great tool to get familiar with BTW).
-https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/[Instructions can be found here.]
+MongoDB has packages for most popular operating systems and is broken into separate installers.
+Download _MongoDB Community Server_ for your OS https://www.mongodb.com/try/download/community[here] and follow the installation instructions.
+A reboot will be required.
+Also download and install the https://www.mongodb.com/try/download/database-tools[MongoDB command line tools for your OS].
+Be sure to set your Path so you can run the tools, consult the documentation.
+Finally install `mongosh` using https://www.mongodb.com/docs/mongodb-shell/install/[these directions].
 
 == Testing our installation
 
-Now we should be able to start connect via the mongo shell:
+MongoDB should now be running in the background as a service and we should be able to via the mongo shell:
 
 [source, console]
 ----
-ryan@R90VJ3MK:~/IT635/docs/exercises$ mongo
-MongoDB shell version v3.6.3
-connecting to: mongodb://127.0.0.1:27017
-MongoDB server version: 3.6.3
-Welcome to the MongoDB shell.
-For interactive help, type "help".
-For more comprehensive documentation, see
-        http://docs.mongodb.org/
-Questions? Try the support group
-        http://groups.google.com/group/mongodb-user
-Server has startup warnings:
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten]
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-> help
-        db.help()                    help on db methods
-        db.mycoll.help()             help on collection methods
-        sh.help()                    sharding helpers
-        rs.help()                    replica set helpers
-        help admin                   administrative help
-        help connect                 connecting to a db help
-        help keys                    key shortcuts
-        help misc                    misc things to know
-        help mr                      mapreduce
+PS C:\Users\rxt1077> mongosh
+Current Mongosh Log ID: 640a5a7a1e2f6944eebe6e33
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1
+.8.0
+Using MongoDB:          6.0.4
+Using Mongosh:          1.8.0
 
-        show dbs                     show database names
-        show collections             show collections in current database
-        show users                   show users in current database
-        show profile                 show most recent system.profile entries with time >= 1ms
-        show logs                    show the accessible logger names
-        show log [name]              prints out the last segment of log in memory, 'global' is default
-        use <db_name>                set current database
-        db.foo.find()                list objects in collection foo
-        db.foo.find( { a : 1 } )     list objects in foo where a == 1
-        it                           result of the last line evaluated; use to further iterate
-        DBQuery.shellBatchSize = x   set default number of items to display on shell
-        exit                         quit the mongo shell
-> show dbs
-admin  0.000GB
-local  0.000GB
-> exit
-bye
+For mongosh info see: https://docs.mongodb.com/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2023-03-09T15:04:09.754-05:00: Access control is not enabled for the database. Read and write access to data and conf
+iguration is unrestricted
+------
+
+------
+   Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+   metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+   The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+   and anyone you share the URL with. MongoDB may use this information to make product
+   improvements and to suggest MongoDB products and deployment options to you.
+
+   To enable free monitoring, run the following command: db.enableFreeMonitoring()
+   To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+------
+
+test> show dbs
+admin   40.00 KiB
+config  12.00 KiB
+local   72.00 KiB
+test> exit
 ----
 
 == Downloading and loading the Sample DB
 
-We will be using the Sakila database, converted to JSON as found
-http://guyharrison.squarespace.com/storage/sakila.tgz[here].
+We will be using the Sakila database, converted to JSON which can be found in three files https://github.com/rxt1077/IT635/tree/master/sakila-json[here].
 
 [source, console]
 ----
-ryan@R90VJ3MK:~/IT635/docs/exercises$ wget http://guyharrison.squarespace.com/storage/sakila.tgz
-Will not apply HSTS. The HSTS database must be a regular and non-world-writable file.
-ERROR: could not open HSTS store at '/home/ryan/.wget-hsts'. HSTS will be disabled.
---2021-03-12 10:25:58--  http://guyharrison.squarespace.com/storage/sakila.tgz
-Resolving guyharrison.squarespace.com (guyharrison.squarespace.com)... 198.49.23.177, 198.185.159.176, 198.185.159.177, ...
-Connecting to guyharrison.squarespace.com (guyharrison.squarespace.com)|198.49.23.177|:80... connected.
-HTTP request sent, awaiting response... 302 Found
-Location: http://static1.1.sqspcdn.com/static/f/359481/26067410/1427081957890/sakila.tgz?token=MShSPWx2I2A1Akf5wBdwgBMD%2FbA%3D [following]
---2021-03-12 10:25:58--  http://static1.1.sqspcdn.com/static/f/359481/26067410/1427081957890/sakila.tgz?token=MShSPWx2I2A1Akf5wBdwgBMD%2FbA%3D
-Resolving static1.1.sqspcdn.com (static1.1.sqspcdn.com)... 151.101.0.238, 151.101.64.238, 151.101.128.238, ...
-Connecting to static1.1.sqspcdn.com (static1.1.sqspcdn.com)|151.101.0.238|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 780149 (762K) [application/octet-stream]
-Saving to: ‘sakila.tgz’
-
-sakila.tgz                                           100%[===================================================================================================================>] 761.86K  --.-KB/s    in 0.1s
-
-2021-03-12 10:25:59 (7.56 MB/s) - ‘sakila.tgz’ saved [780149/780149]
-
-ryan@R90VJ3MK:~/IT635/docs/exercises$ tar zxvf sakila.tgz <1>
-customers.json
-films.json
-stores.json
-ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo mongoimport customers.json <2>
-2021-03-12T10:26:53.110-0500    no collection specified
-2021-03-12T10:26:53.110-0500    using filename 'customers' as collection
-2021-03-12T10:26:53.126-0500    connected to: localhost
-2021-03-12T10:26:53.278-0500    imported 599 documents
-ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo mongoimport films.json
-2021-03-12T10:26:59.242-0500    no collection specified
-2021-03-12T10:26:59.242-0500    using filename 'films' as collection
-2021-03-12T10:26:59.243-0500    connected to: localhost
-2021-03-12T10:26:59.296-0500    imported 1000 documents
-ryan@R90VJ3MK:~/IT635/docs/exercises$ sudo mongoimport stores.json
-2021-03-12T10:27:03.567-0500    no collection specified
-2021-03-12T10:27:03.567-0500    using filename 'stores' as collection
-2021-03-12T10:27:03.569-0500    connected to: localhost
-2021-03-12T10:27:03.613-0500    imported 2 documents
+PS C:\Users\rxt1077\it635\sakila-json> mongoimport customers.json
+2023-03-09T17:21:24.430-0500    no collection specified
+2023-03-09T17:21:24.431-0500    using filename 'customers' as collection
+2023-03-09T17:21:24.443-0500    connected to: mongodb://localhost/
+2023-03-09T17:21:24.566-0500    599 document(s) imported successfully. 0 document(s) failed to import.
+PS C:\Users\rxt1077\it635\sakila-json> mongoimport films.json  
+2023-03-09T17:21:33.528-0500    no collection specified
+2023-03-09T17:21:33.529-0500    using filename 'films' as collection
+2023-03-09T17:21:33.539-0500    connected to: mongodb://localhost/
+2023-03-09T17:21:33.574-0500    1000 document(s) imported successfully. 0 document(s) failed to import.
+PS C:\Users\rxt1077\it635\sakila-json> mongoimport stores.json   
+2023-03-09T17:23:05.374-0500    no collection specified
+2023-03-09T17:23:05.375-0500    using filename 'stores' as collection
+2023-03-09T17:23:05.386-0500    connected to: mongodb://localhost/
+2023-03-09T17:23:05.409-0500    2 document(s) imported successfully. 0 document(s) failed to import.
 ----
-<1> Don't forget to uncompress the archive
-<2> Note that this must be run as root
 
 == Performing a query
 
-Now let's connect to the MongoDB, use the test DB, find the object in the `film`
-collection named `ALI FOREVER`:
+Now let's connect to the MongoDB and find the object in the `film` collection named `ALI FOREVER`:
 
 [source, console]
 ----
-ryan@R90VJ3MK:~/IT635/docs/exercises$ mongo
-MongoDB shell version v3.6.3
-connecting to: mongodb://127.0.0.1:27017
-MongoDB server version: 3.6.3
-Server has startup warnings:
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten]
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
-2021-03-12T10:21:38.912-0500 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] ** WARNING: /sys/kernel/mm/transparent_hugepage/enabled is 'always'.
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten] **        We suggest setting it to 'never'
-2021-03-12T10:21:39.428-0500 I CONTROL  [initandlisten]
-> use test
-switched to db test
-> show collections
+PS C:\Users\rxt1077\it635\sakila-json> mongosh
+Current Mongosh Log ID: 640a5c6fdc1a1a117b00a5d2
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1
+.8.0
+Using MongoDB:          6.0.4
+Using Mongosh:          1.8.0
+
+For mongosh info see: https://docs.mongodb.com/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2023-03-09T15:04:09.754-05:00: Access control is not enabled for the database. Read and write access to data and conf
+iguration is unrestricted
+------
+
+------
+   Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+   metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+   The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+   and anyone you share the URL with. MongoDB may use this information to make product
+   improvements and to suggest MongoDB products and deployment options to you.
+
+   To enable free monitoring, run the following command: db.enableFreeMonitoring()
+   To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+------
+
+test> show collections
 customers
 films
 stores
-> db.films.find( { Title: "ALI FOREVER" } )
-{ "_id" : 13, "Actors" : [ { "First name" : "CARY", "Last name" : "MCCONAUGHEY", "actorId" : 77 }, { "First name" : "CHRISTOPHER", "Last name" : "BERRY", "actorId" : 91 }, { "First name" : "KENNETH", "Last nam
-e" : "TORN", "actorId" : 94 }, { "First name" : "MORGAN", "Last name" : "MCDORMAND", "actorId" : 114 }, { "First name" : "JON", "Last name" : "CHASE", "actorId" : 176 } ], "Category" : "Horror", "Description"
-: "A Action-Packed Drama of a Dentist And a Crocodile who must Battle a Feminist in The Canadian Rockies", "Length" : "150", "Rating" : "PG", "Rental Duration" : "4", "Replacement Cost" : "21.99", "Special Fea
-tures" : "Deleted Scenes,Behind the Scenes", "Title" : "ALI FOREVER" }
-> exit
-bye
+test> db.films.find( { Title: "ALI FOREVER" } )
+[
+  {
+    _id: 13,
+    Actors: [
+      { 'First name': 'CARY', 'Last name': 'MCCONAUGHEY', actorId: 77 },
+      {
+        'First name': 'CHRISTOPHER',
+        'Last name': 'BERRY',
+        actorId: 91
+      },
+      { 'First name': 'KENNETH', 'Last name': 'TORN', actorId: 94 },
+      {
+        'First name': 'MORGAN',
+        'Last name': 'MCDORMAND',
+        actorId: 114
+      },
+      { 'First name': 'JON', 'Last name': 'CHASE', actorId: 176 }
+    ],
+    Category: 'Horror',
+    Description: 'A Action-Packed Drama of a Dentist And a Crocodile who must Battle a Feminist in The Canadian Rockies'
+,
+    Length: '150',
+    Rating: 'PG',
+    'Rental Duration': '4',
+    'Replacement Cost': '21.99',
+    'Special Features': 'Deleted Scenes,Behind the Scenes',
+    Title: 'ALI FOREVER'
+  }
+]
+test> quit
 ----
 
 MongoDB queries consist of multiple documents (parameters) passed as JSON. The
