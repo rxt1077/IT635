@@ -14,7 +14,6 @@ In an empty directory, create the following file:
 .docker-compose.yml
 [source, yml]
 ----
-version: '3.1'
 services:
     db1:
         image: mongo
@@ -72,7 +71,7 @@ terminal we will run the mongo console on db1 and connect to db1:
 
 [source, console]
 ----
-ryan@R90VJ3MK:/tmp$ docker-compose run db1 mongo --host db1
+ryan@R90VJ3MK:/tmp$ docker-compose run db1 mongosh --host db1
 Creating tmp_db1_run ... done
 MongoDB shell version v4.4.5
 connecting to: mongodb://db1:27017/?compressors=disabled&gssapiServiceName=mongodb

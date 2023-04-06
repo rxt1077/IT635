@@ -1,4 +1,4 @@
-= MongoDB Documents, Collections, and Databases
+= MongoDB Documents, Collections, Databases, and Design
 
 == https://www.json.org/json-en.html[JSON]
 
@@ -81,10 +81,39 @@ test.bson: data <1>
 == Collections
 
 [.shrink]
-* documents are store in collections within a DB
+* documents are stored in collections within a DB
 * you can think of collections like tables and documents like the rows
 * collections use the dot notation and can be automatically created:
   `db.myNewCollection2.insertOne( { x: 1 } )`
 * collections can be shown with `show collections` in the mongo shell
 * collections have a UUID which can be seen when you run
   `db.getCollectionInfos()` in the mongo shell
+
+== The Thousand Word Picture
+
+image::mongodb.png[]
+
+== Design: Normalization
+
+* Storing data in multiple collections with references
+* Example: a person collection, an address collection, a phone number collection.
+* Data is NOT replicated, only in one spot
+* Slow reads, fast updates
+
+== Design: Denormalization
+
+* Storing data in a single collection
+* Example: a person collection with addresses and telephone numbers
+* Data is replicated
+* Fast reads, slow updates
+
+== Design: Relationships in MongoDB
+
+* Many more options than an RDMS
+* Documents can have documents within themselves
+* Documents can reference other documents
+* An ounce of preparation is worth a pound of cure
+
+== MongoDB is Web Scale!
+
+image::nosql.png[width=33%]
